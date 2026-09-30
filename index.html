@@ -37,10 +37,10 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 .ei{width:64px;padding:2px 6px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:32px 0}
 </style></head><body><main>
-<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.0.1</span></h1>
+<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.0.2</span></h1>
 <div id="rob" class="s" hidden style="margin-bottom:8px">👁 唯讀模式：只有管理者可以修改</div>
 <div class="seg"><button id="v_l" class="on">清單</button><button id="v_m">位置圖</button></div>
-<div id="dtool" class="row" hidden style="margin:0 0 6px"><button id="d_exp">⬇ 匯出資料</button><button id="d_imp">⬆ 匯入資料</button><button id="d_htm">⬇ 匯出 HTML（含完整資料）</button><button id="d_emb" hidden>↺ 載入 HTML 內嵌資料</button><button id="d_ok" class="p" hidden>確定匯入（取代目前資料）</button><input id="d_file" type="file" accept=".json,application/json" hidden></div>
+<div id="dtool" class="row" hidden style="margin:0 0 6px"><button id="d_exp">⬇ 匯出資料</button><button id="d_imp">⬆ 匯入資料</button><button id="d_htm">⬇ 匯出 HTML（含完整資料）</button><button id="d_emb" hidden>↺ 載入 HTML 內嵌資料</button><button id="d_bk" hidden>↩ 還原載入前的本機資料</button><button id="d_ok" class="p" hidden>確定匯入（取代目前資料）</button><input id="d_file" type="file" accept=".json,application/json" hidden></div>
 <div id="dmsg" class="s" style="margin-bottom:8px"></div>
 <div class="bar"><input id="q" type="search" placeholder="搜尋型號、品牌、位置…"><button class="p" id="add">＋ 新增</button></div>
 <div class="tabs" id="tabs"></div>
@@ -69,14 +69,19 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 </main>
 <script id="embedded-data" type="application/json">null</script>
 <script id="app-js">
-const APP_VERSION="1.0.1";
+const APP_VERSION="1.0.2";
 const MAIN_HTML=document.querySelector("main").outerHTML;
 let EMB=null;try{const t=document.getElementById("embedded-data").textContent.trim();if(t&&t!=="null")EMB=JSON.parse(t)}catch(e){}
-let SEED0=null;try{if(EMB&&localStorage.getItem("tools")===null)SEED0=EMB}catch(e){if(EMB)SEED0=EMB}
+const touch=()=>{try{localStorage.setItem("toolsts",String(Date.now()))}catch(e){}};
+let SEED0=null,BACKED=false;
+try{if(EMB){const ap=localStorage.getItem("toolemb"),ts=+localStorage.getItem("toolsts")||0,has=localStorage.getItem("tools")!==null;
+ if(!has||(ap!==String(EMB.t)&&EMB.t>ts)){SEED0=EMB;
+  if(has){const bk={};["tools","toollogs","toolcells","toolgrid","toolhist","toolpics","toolsts"].forEach(k=>{const v=localStorage.getItem(k);if(v!==null)bk[k]=v});
+   try{localStorage.setItem("toolbackup",JSON.stringify(bk));BACKED=true}catch(e){}}}}}catch(e){if(EMB)SEED0=EMB}
 const CATS=["車刀刀片","車刀刀桿","銑刀","銑刀刀桿"];
 let items=null,cat="全部",editId=null,pend=null,pq={},okId=null,ps={},okS=null;
 try{items=JSON.parse(localStorage.getItem("tools")||"null")}catch(e){}
-if(!Array.isArray(items)&&SEED0&&Array.isArray(SEED0.items))items=JSON.parse(JSON.stringify(SEED0.items));
+if(SEED0&&Array.isArray(SEED0.items))items=JSON.parse(JSON.stringify(SEED0.items));
 if(!Array.isArray(items))items=[
 {id:1,cat:"車刀刀片",model:"CNMG120408",brand:"",spec:"TiAlN 塗層",qty:12,min:5,loc:"A-1",note:""},
 {id:2,cat:"車刀刀桿",model:"MCLNR2525M12",brand:"",spec:"25x25 外徑",qty:2,min:1,loc:"A-2",note:""},
@@ -86,9 +91,9 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let canW=!window.claude;
 const whoP=(async()=>{if(!window.claude)return true;try{const u=await claude.use("user");return u?await u.canEdit():false}catch(e){return false}})();
-let logs={},dbh=null;try{const r=localStorage.getItem("toollogs");if(r!==null)logs=JSON.parse(r)||{};else if(SEED0&&SEED0.logs&&typeof SEED0.logs==="object")logs=JSON.parse(JSON.stringify(SEED0.logs))}catch(e){}
+let logs={},dbh=null;try{const r=localStorage.getItem("toollogs");if(SEED0&&SEED0.logs&&typeof SEED0.logs==="object")logs=JSON.parse(JSON.stringify(SEED0.logs));else if(r!==null)logs=JSON.parse(r)||{}}catch(e){}
 let ref=null,timer=null;
-function save(){try{localStorage.setItem("tools",JSON.stringify(items))}catch(e){}
+function save(){touch();try{localStorage.setItem("tools",JSON.stringify(items))}catch(e){$("dmsg").textContent="⚠ 本機儲存失敗（瀏覽器容量不足或禁止儲存），請先按「匯出資料」備份"}
  if(ref){clearTimeout(timer);timer=setTimeout(()=>{ref.set({items}).catch(()=>{})},400)}}
 (async()=>{try{
  if(!window.claude)return;
@@ -164,7 +169,7 @@ $("list").onclick=e=>{
  pend=null;save();persistPics();render();
 };
 const DAY=864e5,lt={};
-function saveLog(id){try{localStorage.setItem("toollogs",JSON.stringify(logs))}catch(e){}
+function saveLog(id){touch();try{localStorage.setItem("toollogs",JSON.stringify(logs))}catch(e){}
  if(!dbh)return;clearTimeout(lt[id]);lt[id]=setTimeout(()=>dbh.doc("logs/"+id).set({l:logs[id]||[]}).catch(()=>{}),500)}
 function addLog(id,n,t,ty){const l=logs[id]=logs[id]||[];l.push(ty?[t,n,ty]:[t,n]);if(l.length>800)logs[id]=l.slice(-800);saveLog(id)}
 function dropLog(id){delete logs[id];try{localStorage.setItem("toollogs",JSON.stringify(logs))}catch(e){}clearTimeout(lt[id]);if(dbh)dbh.doc("logs/"+id).delete().catch(()=>{})}
@@ -233,8 +238,8 @@ $("sdlg").onclick=e=>{
 };
 
 let pdata=null,pimg=null,pics={};
-try{const r=localStorage.getItem("toolpics");if(r!==null)pics=JSON.parse(r)||{};else if(SEED0&&SEED0.pics&&typeof SEED0.pics==="object")pics=JSON.parse(JSON.stringify(SEED0.pics))}catch(e){}
-function persistPics(){if(dbh)return;try{localStorage.setItem("toolpics",JSON.stringify(pics))}catch(e){}}
+try{const r=localStorage.getItem("toolpics");if(SEED0&&SEED0.pics&&typeof SEED0.pics==="object")pics=JSON.parse(JSON.stringify(SEED0.pics));else if(r!==null)pics=JSON.parse(r)||{}}catch(e){}
+function persistPics(){if(dbh)return;try{localStorage.setItem("toolpics",JSON.stringify(pics))}catch(e){$("dmsg").textContent="⚠ 照片太多，本機容量不足，部分照片可能無法保留"}}
 let impData=null;
 $("d_exp").onclick=async()=>{
  const used={};items.forEach(i=>{if(pics[i.id])used[i.id]=pics[i.id]});
@@ -299,12 +304,12 @@ const SEED=[
 ["WDX38-C32-2D-76L","HCAP-10R-C12-3D-30|HCAP-20R-C25-3D-60","SP16.5/2D-C25|HCAP-20R-C25-2.25D-45","C12M-SVUCR08-16","ETGDR-25-4M","C08K-SCLCR06-10|C0805K-SCLCR03-06","A16Q SDUNR 0803","A25R-MWLNR-08|A20R-MWLNR-08","WDX32-C32-2D-64L|WDX40-C32-2D-80L"],
 ["WDX30-C32-3D-90L","WDX26-C32-3D-78L","SNF20R-2.5D-C25","158E-2525M-14/00-J","C06J-SCLCR04-07","AAWLNR-2525MWP|EWLNR-2525M08","WDX18-C25-2D-36L","S1607K-SCLCR-06-L20","MTQNR-2525M-16|WTQNR-2525M-16"]];
 try{cells=JSON.parse(localStorage.getItem("toolcells")||"null");const g=JSON.parse(localStorage.getItem("toolgrid")||"null");if(g)setGrid(g.nc,g.nr)}catch(e){}
-if(!cells&&SEED0&&SEED0.cells&&typeof SEED0.cells==="object"){cells=JSON.parse(JSON.stringify(SEED0.cells));try{if(localStorage.getItem("toolgrid")===null&&SEED0.nc&&SEED0.nr)setGrid(SEED0.nc,SEED0.nr)}catch(e){}}
+if(SEED0&&SEED0.cells&&typeof SEED0.cells==="object"){cells=JSON.parse(JSON.stringify(SEED0.cells));if(SEED0.nc&&SEED0.nr)setGrid(SEED0.nc,SEED0.nr)}
 if(!cells){cells={};SEED.forEach((row,ri)=>row.forEach((v,ci)=>{if(v)cells[COLS[ci]+(ri+1)]=v.split("|").join("\n")}))}
 const nz=v=>String(v||"").toUpperCase().replace(/[\s\-_]/g,"");
 const lines=k=>(cells[k]||"").split("\n").map(x=>x.trim()).filter(Boolean);
 function locs(it){const n=nz(it.model),o=[];if(!n)return o;for(const c of COLS)for(let r=1;r<=NR;r++){const k=c+r;if(lines(k).some(x=>nz(x)===n))o.push(k)}return o}
-function saveCells(){try{localStorage.setItem("toolcells",JSON.stringify(cells));localStorage.setItem("toolgrid",JSON.stringify({nc:NC,nr:NR}))}catch(e){}
+function saveCells(){touch();try{localStorage.setItem("toolcells",JSON.stringify(cells));localStorage.setItem("toolgrid",JSON.stringify({nc:NC,nr:NR}))}catch(e){}
  if(lref){clearTimeout(cto);cto=setTimeout(()=>lref.set({c:cells,nc:NC,nr:NR}).catch(()=>{}),400)}}
 function renderMap(){
  const q=nz($("q").value);let h='<div class="mg'+(q||focusK?" f":"")+'" style="grid-template-columns:24px repeat('+NC+',minmax(104px,1fr));min-width:'+(24+NC*108)+'px"><div></div>'+COLS.map(c=>`<div class="mh">${c}</div>`).join("");
@@ -326,10 +331,10 @@ $("mtool").onclick=e=>{const g=e.target.dataset.g;if(!g||!canW)return;let msg=""
  if(NC!==S.nc||NR!==S.nr){hist.push(S);saveHist()}
  saveCells();render();$("mmsg").textContent=msg};
 let hist=[],hrf=null,hto=null;
-try{const r=localStorage.getItem("toolhist");if(r!==null)hist=JSON.parse(r)||[];else if(SEED0&&Array.isArray(SEED0.hist))hist=JSON.parse(JSON.stringify(SEED0.hist))}catch(e){}
+try{const r=localStorage.getItem("toolhist");if(SEED0&&Array.isArray(SEED0.hist))hist=JSON.parse(JSON.stringify(SEED0.hist));else if(r!==null)hist=JSON.parse(r)||[]}catch(e){}
 const clone=o=>JSON.parse(JSON.stringify(o));
 function saveHist(){while(hist.length>20||(hist.length>1&&JSON.stringify(hist).length>200000))hist.shift();
- try{localStorage.setItem("toolhist",JSON.stringify(hist))}catch(e){}
+ touch();try{localStorage.setItem("toolhist",JSON.stringify(hist))}catch(e){}
  if(hrf){clearTimeout(hto);hto=setTimeout(()=>hrf.set({h:hist}).catch(()=>{}),500)}}
 function snap(n){hist.push({t:Date.now(),c:clone(cells),nc:NC,nr:NR,n});saveHist()}
 function applySnap(h){cells=clone(h.c);setGrid(h.nc,h.nr);saveCells();render()}
@@ -341,8 +346,13 @@ $("hdlg").onclick=e=>{const v=e.target.dataset.h;if(v===undefined)return;if(v===
 $("c_x").onclick=()=>$("cdlg").close();
 $("c_s").onclick=()=>{if(!canW)return;const v=$("c_t").value.split("\n").map(x=>x.trim()).filter(Boolean).join("\n");if(v!==lines(ck).join("\n"))snap("修改 "+ck+" 格");if(v)cells[ck]=v;else delete cells[ck];saveCells();$("cdlg").close();render()};
 
-if(SEED0){const w=(k,v)=>{try{if(localStorage.getItem(k)===null)localStorage.setItem(k,JSON.stringify(v))}catch(e){}};w("tools",items);w("toollogs",logs);w("toolcells",cells);w("toolgrid",{nc:NC,nr:NR});w("toolhist",hist);w("toolpics",pics)}
+if(SEED0){const w=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};w("tools",items);w("toollogs",logs);w("toolcells",cells);w("toolgrid",{nc:NC,nr:NR});w("toolhist",hist);w("toolpics",pics);try{localStorage.setItem("toolemb",String(EMB.t));localStorage.setItem("toolsts",String(EMB.t))}catch(e){}
+ $("dmsg").textContent="已載入 HTML 內嵌資料（"+items.length+" 筆刀具）。"+(BACKED?"這個瀏覽器原本的資料已自動備份，可按「還原載入前的本機資料」找回。":"")}
 $("d_emb").hidden=!EMB;
+try{$("d_bk").hidden=localStorage.getItem("toolbackup")===null}catch(e){}
+$("d_bk").onclick=()=>{if(!canW)return;try{const b=JSON.parse(localStorage.getItem("toolbackup")),g=b.toolgrid?JSON.parse(b.toolgrid):{};
+ impData={app:"tool-manager",items:JSON.parse(b.tools),logs:b.toollogs?JSON.parse(b.toollogs):{},cells:b.toolcells?JSON.parse(b.toolcells):null,nc:g.nc,nr:g.nr,hist:b.toolhist?JSON.parse(b.toolhist):[],pics:b.toolpics?JSON.parse(b.toolpics):{}};
+ $("d_ok").hidden=false;$("dmsg").textContent="按「確定匯入」會用載入內嵌資料前的本機資料（"+impData.items.length+" 筆刀具）取代目前資料。"}catch(e){$("dmsg").textContent="找不到可還原的備份"}};
 $("ver").textContent="Version "+APP_VERSION+(EMB&&EMB.t?" · 內嵌資料 "+new Date(EMB.t).toLocaleString("zh-TW",{hour12:false,year:"numeric",month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}):"");
 whoP.then(v=>{canW=v;render()});
 render();
