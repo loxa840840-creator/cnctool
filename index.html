@@ -38,7 +38,7 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 .ei{width:64px;padding:2px 6px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:32px 0}
 </style></head><body><main>
-<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.1.1</span></h1>
+<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.1.2</span></h1>
 <div id="who" class="row s" hidden style="margin:0 0 8px"><span id="who_t"></span><span id="syn"></span><button id="rf">↻ 重新整理</button><button id="adm" hidden>👥 帳號管理</button><button id="lo">登出</button></div>
 <div id="rob" class="s" hidden style="margin-bottom:8px">👁 唯讀模式：只有管理者可以修改</div>
 <div class="seg"><button id="v_l" class="on">清單</button><button id="v_m">位置圖</button></div>
@@ -73,7 +73,7 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 </main>
 <script id="embedded-data" type="application/json">null</script>
 <script id="app-js">
-const APP_VERSION="1.1.1";
+const APP_VERSION="1.1.2";
 const SB_URL="https://ycoyzffgqlxzhhpnctoq.supabase.co",SB_KEY="sb_publishable_1xyIZq2vpBUOLfd2jps1oQ_A5tHFAZg";
 const CLOUD=!window.claude&&!!SB_URL;let SBON=false,canQ=false,SES=null,lastT=new Map();
 const MAIN_HTML=document.querySelector("main").outerHTML;
@@ -376,7 +376,7 @@ async function authP(path,body){const r=await fetch(SB_URL+"/auth/v1/"+path,{met
 async function tok(){if(!SES)throw new Error("未登入");if(Date.now()>SES.exp){try{setSes(toSes(await authP("token?grant_type=refresh_token",{refresh_token:SES.rt})))}catch(e){setSes(null);showLogin("登入已過期，請重新登入");throw e}}return SES.at}
 async function api(path,o){o=o||{};const r=await fetch(SB_URL+"/rest/v1/"+path,{method:o.method||"GET",headers:Object.assign(H0(),{Authorization:"Bearer "+await tok()},o.prefer?{Prefer:o.prefer}:{}),body:o.body===undefined?undefined:JSON.stringify(o.body)});const t=await r.text();if(!r.ok)throw new Error(r.status+" "+t.slice(0,120));return t?JSON.parse(t):null}
 const setSyn=(t,bad)=>{$("syn").textContent=t;$("syn").style.color=bad?"var(--warn)":"var(--mut)"};
-function showLogin(m){$("auth").hidden=false;$("a_m").textContent=m||""}
+function showLogin(m){$("auth").hidden=false;$("a_m").textContent=(m||"")+"（程式版本 "+APP_VERSION+"）"}
 function cacheLocal(){try{localStorage.setItem("tools",JSON.stringify(items));localStorage.setItem("toollogs",JSON.stringify(logs));localStorage.setItem("toolcells",JSON.stringify(cells));localStorage.setItem("toolgrid",JSON.stringify({nc:NC,nr:NR}));localStorage.setItem("toolhist",JSON.stringify(hist));localStorage.setItem("toolsts",String(Date.now()))}catch(e){}}
 const UPS="resolution=merge-duplicates,return=minimal";
 async function syncTools(list){
@@ -418,7 +418,7 @@ async function cloudStart(){
   $("who").hidden=false;$("who_t").textContent=SES.email+" · "+(canW?"管理員":"使用者");$("adm").hidden=!canW;
   $("rob").textContent=canW?"":"👁 一般使用者：只能加減刀具數量（按 ＋／－ 後請按儲存）";
   dbh=cdb;ref=cdb.doc("inventory/main");lref=cdb.doc("layout/main");hrf=cdb.doc("layout/hist");
-  await cloudLoad()}catch(e){canW=false;canQ=false;SBON=false;setSyn("⚠ 無法連線雲端："+e.message,1);$("who").hidden=false;render()}}
+  await cloudLoad()}catch(e){canW=false;canQ=false;SBON=false;setSyn("⚠ 無法連線雲端："+e.message,1);$("who").hidden=false;render();showLogin("登入後無法載入資料："+e.message)}}
 $("a_in").onclick=async()=>{try{$("a_m").textContent="登入中…";setSes(toSes(await authP("token?grant_type=password",{email:$("a_e").value.trim(),password:$("a_p").value})));cloudStart()}catch(e){$("a_m").textContent="登入失敗："+e.message}};
 $("a_up").onclick=async()=>{try{$("a_m").textContent="註冊中…";const j=await authP("signup",{email:$("a_e").value.trim(),password:$("a_p").value});if(j.access_token){setSes(toSes(j));cloudStart()}else $("a_m").textContent="註冊完成，請等管理員核准後再登入"}catch(e){$("a_m").textContent="註冊失敗："+e.message}};
 const logout=()=>{setSes(null);["tools","toollogs","toolcells","toolgrid","toolhist","toolsts"].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});location.reload()};
