@@ -27,6 +27,14 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 .r{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid var(--bd);font-size:14px}.h{font-weight:600;margin:12px 0 4px}
 [hidden]{display:none!important}.th{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--bd);flex:none;cursor:pointer}#f_prev{width:80px;height:80px}
 .qo [data-a=edit],.qo [data-a=del],.qo [data-a=apply],.qo [data-a=dellog],.qo .adm{display:none}
+.tb{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}.tb th,.tb td{border-bottom:1px solid var(--bd);padding:6px 6px;text-align:left;white-space:nowrap}.tb input{width:90px;padding:4px 6px}
+#facv .fw{overflow:auto;border:1px solid var(--bd);border-radius:8px;background:#fff;max-height:78vh}
+.fg{display:grid;width:max-content;background:#fff}
+.fc{box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;white-space:pre-line;overflow:hidden;color:#111;word-break:break-all;padding:0 1px;border-style:solid;border-color:#333}
+.fc.fp{overflow:visible;white-space:nowrap;word-break:normal;z-index:2}
+.fc.fu{cursor:pointer}.fc.fu:hover{outline:2px solid var(--ac);outline-offset:-2px}
+.fc.hit{outline:3px solid #f59e0b;outline-offset:-3px;position:relative;z-index:1}
+.fg.f .fc:not(.hit){opacity:.35}
 .ro [data-a=dec],.ro [data-a=inc],.ro [data-a=edit],.ro [data-a=del],.ro [data-a=apply],.ro [data-a=dellog],.ro .adm{display:none}
 .seg{display:flex;gap:6px;margin-bottom:10px}.seg button{flex:1}.seg .on{background:var(--ac);color:#fff;border-color:var(--ac)}
 #map{overflow-x:auto;padding-bottom:8px}
@@ -38,15 +46,17 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 .ei{width:64px;padding:2px 6px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:32px 0}
 </style></head><body><main>
-<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.2.0</span></h1>
+<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.4.0</span> <button class="lgb" style="font-size:12px;padding:2px 8px;margin-left:6px">ไทย</button></h1>
 <div id="who" class="row s" hidden style="margin:0 0 8px"><span id="who_t"></span><span id="syn"></span><button id="rf">↻ 重新整理</button><button id="adm" hidden>👥 帳號管理</button><button id="pw">🔑 改密碼</button><button id="lo">登出</button></div>
 <div id="rob" class="s" hidden style="margin-bottom:8px">👁 唯讀模式：只有管理者可以修改</div>
-<div class="seg"><button id="v_l" class="on">刀桿清單</button><button id="v_m">車床位置圖</button><button id="v_n">銑床位置圖</button></div>
+<div class="seg"><button id="v_l" class="on">刀桿清單</button><button id="v_m">車床位置圖</button><button id="v_n">銑床位置圖</button><button id="v_p">加工產品</button><button id="v_f">現場機台</button></div>
 <div id="dtool" class="row" hidden style="margin:0 0 6px"><button id="d_exp">⬇ 匯出資料</button><button id="d_imp">⬆ 匯入資料</button><button id="d_htm">⬇ 匯出 HTML（含完整資料）</button><button id="d_emb" hidden>↺ 載入 HTML 內嵌資料</button><button id="d_pub" hidden>📌 把目前資料存進頁面</button><button id="d_bk" hidden>↩ 還原載入前的本機資料</button><button id="d_ok" class="p" hidden>確定匯入（取代目前資料）</button><input id="d_file" type="file" accept=".json,application/json" hidden></div>
 <div id="dmsg" class="s" style="margin-bottom:8px"></div>
 <div class="bar"><input id="q" type="search" placeholder="搜尋型號、品牌、位置…"><button class="p" id="add">＋ 新增</button></div>
 <div class="tabs" id="tabs"></div>
 <div id="list"></div>
+<div id="facv" hidden></div>
+<div id="prodv" hidden></div>
 <div id="mtool" class="row" hidden style="flex-wrap:wrap"><button data-g="ac">＋ 新增一欄</button><button data-g="ar">＋ 新增一列</button><button data-g="dc">－ 刪除最後一欄</button><button data-g="dr">－ 刪除最後一列</button><button data-g="undo">↩ 復原上一步</button><button data-g="hist">🕘 歷史紀錄</button></div>
 <div id="mmsg" class="s" style="color:var(--warn)"></div>
 <div id="map" hidden></div>
@@ -55,11 +65,13 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 <div id="photoBox"><label>照片</label><div class="row" style="margin-top:4px"><img id="f_prev" class="th" alt="" hidden><input id="f_file" type="file" accept="image/*" style="flex:1;min-width:0"><button id="f_rm" hidden>移除照片</button></div></div>
 <label>類別</label><select id="f_cat"></select>
 <label>型號 / 名稱</label><input id="f_model" placeholder="例：CNMG120408、MCLNR2525M12">
+<label>品號 / 序號（方便查詢）</label><input id="f_pn" placeholder="例：序號、料號">
 <div class="g"><div><label>品牌</label><input id="f_brand"></div><div><label>規格（材質/塗層/直徑）</label><input id="f_spec"></div></div>
 <div class="g"><div><label>庫存數量</label><input id="f_qty" type="number" min="0" value="0"></div><div><label>最低庫存（低於警示）</label><input id="f_min" type="number" min="0" value="0"></div></div>
 <label>最高庫存（超過警示，0 表示不限）</label><input id="f_max" type="number" min="0" value="0">
 <label>補貨交期（天）</label><input id="f_lead" type="number" min="1" value="7">
 <label>備註</label><textarea id="f_note" rows="2"></textarea>
+<label>加工過的產品（可複選）</label><div id="f_prods" class="s" style="display:flex;flex-wrap:wrap;gap:6px 14px;margin:4px 0"></div><div class="s">要新增產品，請到上方「加工產品」頁面。</div>
 <div id="perr" class="s" style="color:var(--warn)"></div>
 <div class="row"><button id="cancel" style="margin-left:auto">取消</button><button class="p" id="save">儲存</button></div>
 </dialog>
@@ -68,13 +80,17 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 <dialog id="hdlg"></dialog>
 <dialog id="cdlg"><b id="ct_">位置</b><div class="s">一行一支刀桿</div><textarea id="c_t" rows="6" style="width:100%;margin-top:6px"></textarea><div class="row"><button id="c_x" style="margin-left:auto">關閉</button><button class="p" id="c_s">儲存</button></div></dialog>
 <dialog id="zdlg"><img id="zimg" alt="" style="width:100%;border-radius:8px"><div class="row"><button id="zc" style="margin-left:auto">關閉</button></div></dialog>
-<div id="auth" hidden style="position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px"><div style="width:100%;max-width:340px"><h2 style="margin:0 0 12px">🔧 刀具管理 登入</h2><input id="a_e" type="email" placeholder="Email" autocomplete="username"><input id="a_p" type="password" placeholder="密碼（至少 6 碼）" autocomplete="current-password" style="margin-top:8px"><label class="s" style="display:block;margin-top:6px"><input id="a_sp" type="checkbox" style="width:auto"> 顯示密碼</label><div class="row"><button class="p" id="a_in">登入</button><button id="a_up">註冊新帳號</button><button id="a_out">登出</button></div><div id="a_m" class="s" style="margin-top:10px"></div></div></div>
+<div id="auth" hidden style="position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px"><div style="width:100%;max-width:340px"><h2 style="margin:0 0 12px">🔧 刀具管理 登入 <button class="lgb" style="font-size:12px;padding:2px 8px">ไทย</button></h2><input id="a_e" type="email" placeholder="Email" autocomplete="username"><input id="a_p" type="password" placeholder="密碼（至少 6 碼）" autocomplete="current-password" style="margin-top:8px"><label class="s" style="display:block;margin-top:6px"><input id="a_sp" type="checkbox" style="width:auto"> 顯示密碼</label><div class="row"><button class="p" id="a_in">登入</button><button id="a_up">註冊新帳號</button><button id="a_out">登出</button></div><div id="a_m" class="s" style="margin-top:10px"></div></div></div>
 <dialog id="udlg"></dialog>
 <dialog id="kdlg"></dialog>
+<dialog id="pdlg"></dialog>
+<dialog id="pldg"></dialog>
+<dialog id="fdlg"></dialog>
+<dialog id="xdlg"></dialog>
 </main>
 <script id="embedded-data" type="application/json">null</script>
 <script id="app-js">
-const APP_VERSION="1.2.0";
+const APP_VERSION="1.4.0";
 const SB_URL="https://ycoyzffgqlxzhhpnctoq.supabase.co",SB_KEY="sb_publishable_1xyIZq2vpBUOLfd2jps1oQ_A5tHFAZg";
 const CLOUD=!window.claude&&!!SB_URL;let SBON=false,canQ=false,SES=null,lastT=new Map();
 const MAIN_HTML=document.querySelector("main").outerHTML;
@@ -87,6 +103,13 @@ try{if(EMB){const ap=localStorage.getItem("toolemb"),ts=+localStorage.getItem("t
    try{localStorage.setItem("toolbackup",JSON.stringify(bk));BACKED=true}catch(e){}}}}}catch(e){if(EMB)SEED0=EMB}
 let CATS=["車刀刀片","車刀刀桿","銑刀","銑刀刀桿"],cref=null;
 try{const r=JSON.parse(localStorage.getItem("toolcats")||"null");if(Array.isArray(r)&&r.length)CATS=r}catch(e){}
+let PRODS=[],prref=null,pdel=null;
+try{const r=JSON.parse(localStorage.getItem("toolprods")||"null");if(Array.isArray(r))PRODS=r}catch(e){}
+function saveProds(){touch();try{localStorage.setItem("toolprods",JSON.stringify(PRODS))}catch(e){}if(prref)prref.set({c:PRODS}).catch(()=>{})}
+function askText(t,def){return new Promise(res=>{const d=$("pdlg");d.innerHTML=`<b>${t}</b><input id="p_i" value="${String(def||"").replace(/"/g,"&quot;")}" style="margin-top:8px"><div class="row"><button id="p_x" style="margin-left:auto">取消</button><button class="p" id="p_o">確定</button></div>`;let done=false;const f=v=>{if(done)return;done=true;d.close();res(v)};
+ $("p_o").onclick=()=>f($("p_i").value.trim());$("p_x").onclick=()=>f(null);$("p_i").onkeydown=e=>{if(e.key==="Enter")f($("p_i").value.trim())};d.oncancel=()=>f(null);d.showModal();$("p_i").focus()})}
+function drawProds(sel){$("f_prods").innerHTML=PRODS.length?PRODS.map(p=>`<label style="display:inline-flex;align-items:center;gap:4px"><input type="checkbox" style="width:auto" data-p="${esc(p)}"${sel.includes(p)?" checked":""}>${esc(p)}</label>`).join(""):"<span>尚無產品，請在下方新增</span>"}
+const curProds=()=>[...$("f_prods").querySelectorAll("input:checked")].map(x=>x.dataset.p);
 function fillCat(){$("f_cat").innerHTML=CATS.map(c=>`<option>${c}</option>`).join("")}
 function saveCats(){touch();try{localStorage.setItem("toolcats",JSON.stringify(CATS))}catch(e){}fillCat();if(cref)cref.set({c:CATS}).catch(()=>{})}
 let items=null,cat="全部",editId=null,pend=null,pq={},okId=null,ps={},okS=null;
@@ -117,19 +140,25 @@ function save(){touch();try{localStorage.setItem("tools",JSON.stringify(items))}
  try{const hr=db.doc("layout/hist"),hs=await hr.get();if(hs.exists&&Array.isArray(hs.data().h))hist=clone(hs.data().h);hrf=hr}catch(e){}
  try{const mr=db.doc("layout/mill"),ms=await mr.get();MP.m.lref=mr;if(ms.exists&&ms.data().c){const d=ms.data();MP.m.cells=clone(d.c);MP.m.nc=d.nc||9;MP.m.nr=d.nr||8}else if(await whoP){await mr.set({c:MP.m.cells,nc:MP.m.nc,nr:MP.m.nr})}}catch(e){}
  try{const mh=db.doc("layout/histm"),s2=await mh.get();MP.m.hrf=mh;if(s2.exists&&Array.isArray(s2.data().h))MP.m.hist=clone(s2.data().h)}catch(e){}
+ try{const pr=db.doc("layout/prods"),p2=await pr.get();prref=pr;if(p2.exists&&Array.isArray(p2.data().c))PRODS=clone(p2.data().c)}catch(e){}
+ try{const fr=db.doc("layout/fac"),f2=await fr.get();fref=fr;if(f2.exists&&f2.data().ov)FAC=clone(f2.data())}catch(e){}
+ try{const sr=db.doc("layout/spec"),s3=await sr.get();sref=sr;if(s3.exists&&Array.isArray(s3.data().rows))SPEC=Object.assign({rows:[],factor:1,period:"每月"},clone(s3.data()))}catch(e){}
  try{const cr=db.doc("layout/cats"),c2=await cr.get();cref=cr;if(c2.exists&&Array.isArray(c2.data().c)&&c2.data().c.length){CATS=clone(c2.data().c);fillCat();render()}}catch(e){}
 }catch(e){}})();
 fillCat();
 function render(){
  $("list").className=canW?"":canQ?"qo":"ro";$("rob").hidden=canW;$("dtool").hidden=!canW;
- $("v_l").className=view==="l"?"on":"";$("v_m").className=view==="m"?"on":"";$("v_n").className=view==="n"?"on":"";
- const L=view==="l";$("tabs").hidden=!L;$("list").hidden=!L;$("add").hidden=!L||!canW;$("map").hidden=L;$("mtool").hidden=L||!canW;
+ $("v_l").className=view==="l"?"on":"";$("v_m").className=view==="m"?"on":"";$("v_n").className=view==="n"?"on":"";$("v_p").className=view==="p"?"on":"";$("v_f").className=view==="f"?"on":"";
+ const L=view==="l";$("tabs").hidden=!L;$("list").hidden=!L;$("add").hidden=!L||!canW;$("facv").hidden=view!=="f";$("prodv").hidden=view!=="p";$("map").hidden=view!=="m"&&view!=="n";$("mtool").hidden=(view!=="m"&&view!=="n")||!canW;
+ if(view==="f"){renderFac();return}
+ if(view==="p"){renderProdView();return}
  if(!L){renderMap();return}
  $("tabs").innerHTML=["全部",...CATS].map(c=>`<button class="${c===cat?"on":""}" data-c="${c}">${c}</button>`).join("")+(canW?'<button data-c="__edit">⚙ 編輯分類</button>':"");
  const k=$("q").value.trim().toLowerCase();
- const rs=items.filter(i=>(cat==="全部"||i.cat===cat)&&(!k||[i.model,i.brand,i.spec,i.note,locs(i).join(" ")].join(" ").toLowerCase().includes(k)));
- $("list").innerHTML=rs.length?rs.map(i=>{const dq=pq[i.id]!==undefined,q=dq?pq[i.id]:i.qty,low=q<=i.min,high=i.max>0&&q>i.max,st=stats(i);return `<div class="card"><div class="top"><div style="display:flex;gap:10px;min-width:0">${imgSrc(i)?`<img class="th" alt="" src="${imgSrc(i)}" data-a="zoom" data-i="${i.id}">`:""}<div><div class="m">${esc(i.model)}</div><div class="s">${esc([i.brand,i.spec].filter(Boolean).join(" · "))}</div></div></div><span class="tag">${i.cat}</span></div>
+ const rs=items.filter(i=>(cat==="全部"||i.cat===cat)&&(!k||[i.model,i.pn,i.brand,i.spec,i.note,(i.prods||[]).join(" "),i.prod,locs(i).join(" ")].join(" ").toLowerCase().includes(k)));
+ $("list").innerHTML=rs.length?rs.map(i=>{const dq=pq[i.id]!==undefined,q=dq?pq[i.id]:i.qty,low=q<=i.min,high=i.max>0&&q>i.max,st=stats(i);return `<div class="card"><div class="top"><div style="display:flex;gap:10px;min-width:0">${imgSrc(i)?`<img class="th" alt="" src="${imgSrc(i)}" data-a="zoom" data-i="${i.id}">`:""}<div><div class="m">${esc(i.model)}</div>${i.pn?`<div class="s">品號：${esc(i.pn)}</div>`:""}<div class="s">${esc([i.brand,i.spec].filter(Boolean).join(" · "))}</div></div></div><span class="tag">${i.cat}</span></div>
  <div class="s">${i.note?esc(i.note)+" ":""}${locs(i).map(k=>`<button class="tag" data-a="goto" data-k="${k}" style="cursor:pointer">${k.startsWith("銑:")?"銑床 "+k.slice(2):"車床 "+k}</button>`).join(" ")}</div>
+ ${(i.prods&&i.prods.length)||i.prod?`<div class="s">加工過：${esc([...(i.prods||[]),i.prod].filter(Boolean).join("、"))}</div>`:""}
  ${(st||i.ov)?statLine(i,st):""}
  <div class="row"><div class="q"><button data-a="dec" data-i="${i.id}">−</button><b class="${low?"low":high?"high":""}">${q}</b><button data-a="inc" data-i="${i.id}">＋</button>${dq?`<span class="tag" style="color:#d97706;border-color:#d97706">未儲存（原 ${i.qty}）</span>`:""}${okId===i.id?'<span class="tag" style="color:#16a34a;border-color:#16a34a">✓ 已儲存</span>':""}${low?'<span class="tag low">庫存偏低</span>':""}${high?'<span class="tag high">庫存偏高</span>':""}</div>
  ${dq?`<button class="p" data-a="sv" data-i="${i.id}">儲存</button><button data-a="rv" data-i="${i.id}">取消</button>`:""}<button data-a="log" data-i="${i.id}">紀錄</button><button data-a="edit" data-i="${i.id}">編輯</button><button data-a="del" data-i="${i.id}" ${pend===i.id?'class="p" style="background:var(--warn);border-color:var(--warn)"':""}>${pend===i.id?"再按一次確定刪除":"刪除"}</button></div></div>`}).join(""):'<div class="empty">沒有符合的刀具</div>';
@@ -141,15 +170,15 @@ function statLine(i,st){
  return `<div class="s">📈 週均 ${f("avgW",1)}｜月均 ${f("avgM",1)}｜建議最低 ${f("reorder",0)}${canW&&p?` <span class="tag" style="color:#d97706;border-color:#d97706">未儲存</span> <button class="p" data-a="ssv" data-i="${i.id}" style="padding:2px 8px;font-size:12px">儲存</button> <button data-a="srv" data-i="${i.id}" style="padding:2px 8px;font-size:12px">取消</button>`:""}${okS===i.id?` <span class="tag" style="color:#16a34a;border-color:#16a34a">✓ 已儲存</span>`:""}${canW&&i.ov&&!p?` <button data-a="ovr" data-i="${i.id}" style="padding:2px 8px;font-size:12px">還原自動</button>`:""}</div>`}
 function openForm(it){
  editId=it?it.id:null;pdata=null;$("dt").textContent=it?"編輯刀具":"新增刀具";
- const d=it||{cat:cat==="全部"?CATS[0]:cat,model:"",brand:"",spec:"",qty:0,min:0,max:0,lead:7,note:""};
+ const d=it||{cat:cat==="全部"?CATS[0]:cat,model:"",brand:"",spec:"",qty:0,min:0,max:0,lead:7,note:"",pn:"",prod:""};
  $("f_cat").value=d.cat;$("f_model").value=d.model;$("f_brand").value=d.brand;$("f_spec").value=d.spec;
- $("f_qty").value=d.qty;$("f_min").value=d.min;$("f_max").value=d.max||0;$("f_lead").value=d.lead||7;pimg=d.img||null;$("f_file").value="";$("perr").textContent="";showPrev(pimg?imgSrc(d):null);$("f_note").value=d.note;$("dlg").showModal();
+ $("f_qty").value=d.qty;$("f_min").value=d.min;$("f_max").value=d.max||0;$("f_lead").value=d.lead||7;pimg=d.img||null;$("f_file").value="";$("perr").textContent="";showPrev(pimg?imgSrc(d):null);$("f_note").value=d.note;$("f_pn").value=d.pn||"";drawProds(d.prods||[]);$("dlg").showModal();
 }
 $("add").onclick=()=>{if(canW)openForm()};
 $("cancel").onclick=()=>$("dlg").close();
 $("save").onclick=async()=>{
  const model=$("f_model").value.trim();if(!model){$("f_model").focus();return}
- const d={cat:$("f_cat").value,model,brand:$("f_brand").value.trim(),spec:$("f_spec").value.trim(),qty:Math.max(0,+$("f_qty").value||0),min:Math.max(0,+$("f_min").value||0),max:Math.max(0,+$("f_max").value||0),lead:Math.max(1,+$("f_lead").value||7),note:$("f_note").value.trim()};
+ const d={cat:$("f_cat").value,model,brand:$("f_brand").value.trim(),spec:$("f_spec").value.trim(),qty:Math.max(0,+$("f_qty").value||0),min:Math.max(0,+$("f_min").value||0),max:Math.max(0,+$("f_max").value||0),lead:Math.max(1,+$("f_lead").value||7),note:$("f_note").value.trim(),pn:$("f_pn").value.trim(),prods:curProds()};
  const nid=editId||Date.now();
  if(pdata){pics[nid]=pdata;d.img=true;if(dbh)try{await dbh.doc("photos/"+nid).set({d:pdata})}catch(e){$("perr").textContent="照片儲存失敗，請稍後再試";return}}
  else if(pimg){d.img=pimg}
@@ -159,7 +188,7 @@ $("save").onclick=async()=>{
 };
 window.addEventListener("beforeunload",e=>{if(Object.keys(pq).length||Object.keys(ps).length){e.preventDefault();e.returnValue=""}});
 $("q").oninput=()=>{focusK=null;render()};
-$("tabs").onclick=e=>{const c=e.target.dataset.c;if(c==="__edit"){if(canW)openCats();return}if(c){cat=c;render()}};
+$("tabs").onclick=e=>{const c=e.target.dataset.c;if(c==="__edit"){if(canW)openCats();return}if(c==="__prod"){if(canW)openProds();return}if(c){cat=c;render()}};
 $("list").onchange=e=>{const f=e.target.dataset.f;if(!f||!canW)return;const it=items.find(i=>i.id===+e.target.dataset.i);if(!it)return;
  const n=Math.max(0,+e.target.value||0);ps[it.id]=ps[it.id]||{};ps[it.id][f]=Math.round(n);render()};
 $("list").onclick=e=>{
@@ -256,7 +285,7 @@ function persistPics(){if(dbh)return;try{localStorage.setItem("toolpics",JSON.st
 let impData=null;
 $("d_exp").onclick=async()=>{
  const used={};items.forEach(i=>{if(pics[i.id])used[i.id]=pics[i.id]});
- const L0=getMap("l"),M0=getMap("m");const data=JSON.stringify({app:"tool-manager",v:2,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cats:CATS});
+ const L0=getMap("l"),M0=getMap("m");const data=JSON.stringify({app:"tool-manager",v:2,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cats:CATS,prods:PRODS,fac:FAC,spec:SPEC});
  const fn="刀具管理備份_"+new Date().toISOString().slice(0,10)+".json";$("dmsg").textContent="";
  try{const dl=window.claude?await claude.use("downloads"):null;
   if(dl){await dl.save({filename:fn,data});$("dmsg").textContent="✓ 已匯出 "+items.length+" 筆刀具";return}
@@ -265,7 +294,7 @@ $("d_exp").onclick=async()=>{
 };
 function buildHtml(){
  const used={};items.forEach(i=>{if(pics[i.id])used[i.id]=pics[i.id]});
- const L0=getMap("l"),M0=getMap("m");const payload={app:"tool-manager",version:APP_VERSION,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cats:CATS};
+ const L0=getMap("l"),M0=getMap("m");const payload={app:"tool-manager",version:APP_VERSION,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cats:CATS,prods:PRODS,fac:FAC,spec:SPEC};
  const j=JSON.stringify(payload).replace(/</g,"\\u003c").replace(/\u2028/g,"\\u2028").replace(/\u2029/g,"\\u2029");
  const css=document.getElementById("app-style").textContent,js=document.getElementById("app-js").textContent;
  const html='<!doctype html>\n<html lang="zh-Hant"><head><meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<title>刀具管理</title>\n<style id="app-style">'+css+'</style></head><body>'+MAIN_HTML+'\n<script id="embedded-data" type="application/json">'+j+'<\/script>\n<script id="app-js">'+js+'<\/script>\n</body></html>';
@@ -295,6 +324,9 @@ $("d_ok").onclick=async()=>{const d=impData;if(!d||!canW)return;impData=null;$("
  save();saveCells();saveHist();Object.keys(logs).forEach(saveLog);
  if(d.mill&&d.mill.cells){MP.m.cells=d.mill.cells;MP.m.nc=d.mill.nc||9;MP.m.nr=d.mill.nr||8;MP.m.hist=d.mill.hist||[];swapMap("m");saveCells();saveHist();swapMap("l")}
  if(Array.isArray(d.cats)&&d.cats.length){CATS=d.cats;saveCats()}
+ if(Array.isArray(d.prods)){PRODS=d.prods;saveProds()}
+ if(d.fac&&d.fac.ov){FAC=d.fac;saveFac()}
+ if(d.spec&&Array.isArray(d.spec.rows)){SPEC=Object.assign({rows:[],factor:1,period:"每月"},d.spec);saveSpec()}
  if(dbh){oldLogs.filter(k=>!(k in logs)).forEach(k=>dbh.doc("logs/"+k).delete().catch(()=>{}));
   for(const k of Object.keys(pics))try{await dbh.doc("photos/"+k).set({d:pics[k]})}catch(e){}
   oldPics.filter(k=>!(k in pics)).forEach(k=>dbh.doc("photos/"+k).delete().catch(()=>{}))}
@@ -393,7 +425,7 @@ async function tok(){if(!SES)throw new Error("未登入");if(Date.now()>SES.exp)
 async function api(path,o){o=o||{};const r=await fetch(SB_URL+"/rest/v1/"+path,{method:o.method||"GET",headers:Object.assign(H0(),{Authorization:"Bearer "+await tok()},o.prefer?{Prefer:o.prefer}:{}),body:o.body===undefined?undefined:JSON.stringify(o.body)});const t=await r.text();if(!r.ok)throw new Error(r.status+" "+t.slice(0,120));return t?JSON.parse(t):null}
 const setSyn=(t,bad)=>{$("syn").textContent=t;$("syn").style.color=bad?"var(--warn)":"var(--mut)"};
 function showLogin(m){$("auth").hidden=false;$("a_m").textContent=(m||"")+"（程式版本 "+APP_VERSION+"）"}
-function cacheLocal(){try{localStorage.setItem("tools",JSON.stringify(items));localStorage.setItem("toollogs",JSON.stringify(logs));const Lm=getMap("l"),Mm=getMap("m");localStorage.setItem("toolcells",JSON.stringify(Lm.cells));localStorage.setItem("toolgrid",JSON.stringify({nc:Lm.nc,nr:Lm.nr}));localStorage.setItem("toolhist",JSON.stringify(Lm.hist));localStorage.setItem("toolcells_m",JSON.stringify(Mm.cells));localStorage.setItem("toolgrid_m",JSON.stringify({nc:Mm.nc,nr:Mm.nr}));localStorage.setItem("toolhist_m",JSON.stringify(Mm.hist));localStorage.setItem("toolcats",JSON.stringify(CATS));localStorage.setItem("toolsts",String(Date.now()))}catch(e){}}
+function cacheLocal(){try{localStorage.setItem("tools",JSON.stringify(items));localStorage.setItem("toollogs",JSON.stringify(logs));const Lm=getMap("l"),Mm=getMap("m");localStorage.setItem("toolcells",JSON.stringify(Lm.cells));localStorage.setItem("toolgrid",JSON.stringify({nc:Lm.nc,nr:Lm.nr}));localStorage.setItem("toolhist",JSON.stringify(Lm.hist));localStorage.setItem("toolcells_m",JSON.stringify(Mm.cells));localStorage.setItem("toolgrid_m",JSON.stringify({nc:Mm.nc,nr:Mm.nr}));localStorage.setItem("toolhist_m",JSON.stringify(Mm.hist));localStorage.setItem("toolcats",JSON.stringify(CATS));localStorage.setItem("toolprods",JSON.stringify(PRODS));localStorage.setItem("toolfac",JSON.stringify(FAC));localStorage.setItem("toolspec",JSON.stringify(SPEC));localStorage.setItem("toolsts",String(Date.now()))}catch(e){}}
 const UPS="resolution=merge-duplicates,return=minimal";
 async function syncTools(list){
  if(canQ&&!canW){for(const it of list){const old=lastT.get(it.id);if(!old)continue;const d=(+it.qty||0)-(+JSON.parse(old).qty||0);if(!d)continue;
@@ -408,9 +440,9 @@ async function cput(a,b,v){
  if(a==="inventory")return syncTools(v.items);
  if(!canW||a==="photos")return;const now=new Date().toISOString();
  if(a==="logs")return api("tool_logs?on_conflict=tool_id",{method:"POST",prefer:UPS,body:{tool_id:+b,data:v.l||[],updated_at:now}});
- if(a==="layout")return api("app_settings?on_conflict=key",{method:"POST",prefer:UPS,body:{key:{main:"layout",hist:"hist",mill:"layout_m",histm:"hist_m",cats:"cats"}[b],value:v,updated_at:now}})}
+ if(a==="layout")return api("app_settings?on_conflict=key",{method:"POST",prefer:UPS,body:{key:{main:"layout",hist:"hist",mill:"layout_m",histm:"hist_m",cats:"cats",prods:"prods",fac:"factory",spec:"prodspec"}[b],value:v,updated_at:now}})}
 const cdb={doc(path){const[a,b]=path.split("/");return{
- async set(v){if(a==="photos"){if(canW)await api("tool_photos?on_conflict=tool_id",{method:"POST",prefer:UPS,body:{tool_id:+b,data:v.d,updated_at:new Date().toISOString()}});return}if(a==="logs"&&!canW)return;try{await cput(a,b,v);setSyn("☁ 已同步 "+new Date().toLocaleTimeString("zh-TW",{hour12:false}))}catch(e){setSyn("⚠ 雲端儲存失敗："+e.message,1)}},
+ async set(v){if(a==="photos"){if(canW)await api("tool_photos?on_conflict=tool_id",{method:"POST",prefer:UPS,body:{tool_id:+b,data:v.d,updated_at:new Date().toISOString()}});return}if(a==="logs"&&!canW)return;try{await cput(a,b,v);setSyn("☁ 已同步 "+new Date().toLocaleTimeString("zh-TW",{hour12:false}))}catch(e){setSyn("⚠ 雲端儲存失敗："+e.message,1);$("dmsg").textContent="⚠ 雲端儲存失敗："+e.message}},
  async delete(){if(!canW)return;if(a==="logs")try{await api("tool_logs?tool_id=eq."+b,{method:"DELETE"})}catch(e){}if(a==="photos")try{await api("tool_photos?tool_id=eq."+b,{method:"DELETE"})}catch(e){}}}}};
 const photoTs=new Map();
 async function loadPhotos(){try{const meta=await api("tool_photos?select=tool_id,updated_at"),have=new Set(meta.map(m=>String(m.tool_id)));
@@ -430,6 +462,9 @@ async function cloudLoad(){
  swapMap("m");const LM=S.layout_m||{};cells=LM.c||{};setGrid(LM.nc||9,LM.nr||8);hist=S.hist_m&&Array.isArray(S.hist_m.h)?S.hist_m.h:[];
  swapMap(keep);
  if(S.cats&&Array.isArray(S.cats.c)&&S.cats.c.length){CATS=S.cats.c;fillCat()}
+ if(S.prods&&Array.isArray(S.prods.c))PRODS=S.prods.c;
+ if(S.factory&&S.factory.ov)FAC=S.factory;
+ if(S.prodspec&&Array.isArray(S.prodspec.rows))SPEC=Object.assign({rows:[],factor:1,period:"每月"},S.prodspec);
  cacheLocal();render();try{renderMap()}catch(e){}setSyn("☁ 已載入 "+new Date().toLocaleTimeString("zh-TW",{hour12:false}));loadPhotos()}
 async function cloudStart(){
  try{const p=await api("profiles?select=role&id=eq."+SES.uid),role=p&&p[0]?p[0].role:"pending";
@@ -437,7 +472,7 @@ async function cloudStart(){
   canW=role==="admin";canQ=role==="user";SBON=true;$("auth").hidden=true;
   $("who").hidden=false;$("who_t").textContent=SES.email+" · "+(canW?"管理員":"使用者");$("adm").hidden=!canW;
   $("rob").textContent=canW?"":"👁 一般使用者：只能加減刀具數量（按 ＋／－ 後請按儲存）";
-  dbh=cdb;ref=cdb.doc("inventory/main");lref=cdb.doc("layout/main");hrf=cdb.doc("layout/hist");MP.m.lref=cdb.doc("layout/mill");MP.m.hrf=cdb.doc("layout/histm");cref=cdb.doc("layout/cats");
+  dbh=cdb;ref=cdb.doc("inventory/main");lref=cdb.doc("layout/main");hrf=cdb.doc("layout/hist");MP.m.lref=cdb.doc("layout/mill");MP.m.hrf=cdb.doc("layout/histm");cref=cdb.doc("layout/cats");prref=cdb.doc("layout/prods");fref=cdb.doc("layout/fac");sref=cdb.doc("layout/spec");
   await cloudLoad()}catch(e){canW=false;canQ=false;SBON=false;setSyn("⚠ 無法連線雲端："+e.message,1);$("who").hidden=false;render();showLogin("登入後無法載入資料："+e.message)}}
 $("a_in").onclick=async()=>{try{$("a_m").textContent="登入中…";setSes(toSes(await authP("token?grant_type=password",{email:$("a_e").value.trim(),password:$("a_p").value})));cloudStart()}catch(e){$("a_m").textContent="登入失敗："+e.message}};
 $("a_up").onclick=async()=>{try{$("a_m").textContent="註冊中…";const j=await authP("signup",{email:$("a_e").value.trim(),password:$("a_p").value});if(j.access_token){setSes(toSes(j));cloudStart()}else $("a_m").textContent="註冊完成，請等管理員核准後再登入"}catch(e){$("a_m").textContent="註冊失敗："+e.message}};
@@ -450,16 +485,247 @@ $("adm").onclick=async()=>{const u=$("udlg");u.innerHTML="載入中…";if(!u.op
   u.innerHTML='<b>帳號管理</b><div class="s">新註冊的帳號是「待核准」，請改成使用者或管理員再按儲存。</div>'+L.map(p=>`<div class="r" style="flex-wrap:wrap"><span style="flex:1;min-width:150px">${esc(p.email||"")}</span><select data-u="${p.id}" style="width:auto"${p.id===SES.uid?" disabled":""}>${o("pending","待核准",p.role)}${o("user","使用者",p.role)}${o("admin","管理員",p.role)}</select><button data-us="${p.id}">儲存</button><button data-up="${p.id}">重設密碼</button></div>`).join("")+cl}
  catch(e){u.innerHTML="載入失敗："+esc(e.message)+cl}};
 $("udlg").onclick=async e=>{if(e.target.dataset.uc)return $("udlg").close();
- const pu=e.target.dataset.up;if(pu){const pw=prompt("輸入這個帳號的新密碼（至少 6 碼）：");if(!pw)return;if(pw.length<6){alert("密碼至少 6 碼");return}
-  try{await api("rpc/admin_set_password",{method:"POST",body:{p_user:pu,p_password:pw}});e.target.textContent="✓ 已重設"}catch(er){e.target.textContent="失敗";alert("重設失敗："+er.message)}return}const id=e.target.dataset.us;if(!id)return;const sel=$("udlg").querySelector('select[data-u="'+id+'"]');
+ const pu=e.target.dataset.up;if(pu){const pw=await askText("輸入這個帳號的新密碼（至少 6 碼）","");if(!pw)return;if(pw.length<6){e.target.textContent="密碼太短";return}
+  try{await api("rpc/admin_set_password",{method:"POST",body:{p_user:pu,p_password:pw}});e.target.textContent="✓ 已重設"}catch(er){e.target.textContent="失敗："+String(er.message).slice(0,50)}return}const id=e.target.dataset.us;if(!id)return;const sel=$("udlg").querySelector('select[data-u="'+id+'"]');
  try{await api("profiles?id=eq."+id,{method:"PATCH",prefer:"return=minimal",body:{role:sel.value}});e.target.textContent="✓ 已儲存"}catch(er){e.target.textContent="失敗"}};
+const TH=[
+["這個瀏覽器原本的資料已自動備份，可按「還原載入前的本機資料」找回。","ข้อมูลเดิมในเบราว์เซอร์นี้ถูกสำรองไว้แล้ว กด「กู้คืนข้อมูลในเครื่องก่อนโหลด」เพื่อเรียกคืน"],
+["本機儲存失敗（瀏覽器容量不足或禁止儲存），請先按「匯出資料」備份","บันทึกในเครื่องไม่สำเร็จ (พื้นที่เบราว์เซอร์ไม่พอหรือถูกห้าม) โปรดกด「ส่งออกข้อมูล」เพื่อสำรอง"],
+["新增、編輯或刪除紀錄不會自動改庫存（新增時可勾選同時調整）。","การเพิ่ม แก้ไข หรือลบบันทึกจะไม่เปลี่ยนสต็อกอัตโนมัติ (ตอนเพิ่มสามารถติ๊กให้ปรับสต็อกด้วย)"],
+["新註冊的帳號是「待核准」，請改成使用者或管理員再按儲存。","บัญชีที่สมัครใหม่จะเป็น「รออนุมัติ」 โปรดเปลี่ยนเป็นผู้ใช้หรือผู้ดูแลระบบแล้วกดบันทึก"],
+["已用在刀具上，再按一次「刪除」會一併從這些刀具移除","ถูกใช้กับเครื่องมือแล้ว กด「ลบ」อีกครั้งจะลบออกจากเครื่องมือเหล่านั้นด้วย"],
+["還原前會先保留目前的版本，所以還原後也能再復原","ก่อนกู้คืนจะเก็บเวอร์ชันปัจจุบันไว้ จึงย้อนกลับได้อีก"],
+["照片太多，本機容量不足，部分照片可能無法保留","รูปภาพมากเกินไป พื้นที่ในเครื่องไม่พอ รูปบางส่วนอาจเก็บไม่ได้"],
+["按「確定匯入」會用載入內嵌資料前的本機資料（","กด「ยืนยันนำเข้า」จะใช้ข้อมูลในเครื่องก่อนโหลดข้อมูลฝัง ("],
+["筆刀具。按「確定匯入」會取代目前所有資料。","รายการ กด「ยืนยันนำเข้า」จะแทนที่ข้อมูลทั้งหมดในปัจจุบัน"],
+["在這裡新增產品，編輯刀具時就能用選項勾選。","เพิ่มผลิตภัณฑ์ที่นี่ แล้วเลือกติ๊กได้ตอนแก้ไขเครื่องมือ"],
+["按「確定匯入」會用 HTML 內嵌的資料","กด「ยืนยันนำเข้า」จะใช้ข้อมูลที่ฝังใน HTML"],
+["還有刀具，請先把刀具移到其他分類再刪除","ยังมีเครื่องมืออยู่ โปรดย้ายเครื่องมือไปหมวดอื่นก่อนลบ"],
+["要新增產品，請到上方「加工產品」頁面。","หากต้องการเพิ่มผลิตภัณฑ์ ไปที่หน้า「ผลิตภัณฑ์ที่ผลิต」ด้านบน"],
+["尚未核准，請管理員設定身分後再登入。","ยังไม่ได้รับอนุมัติ โปรดให้ผู้ดูแลระบบกำหนดสิทธิ์แล้วเข้าสู่ระบบใหม่"],
+["雲端目前沒有資料，請管理員先匯入。","ตอนนี้บนคลาวด์ยังไม่มีข้อมูล โปรดให้ผู้ดูแลระบบนำเข้าก่อน"],
+["一般使用者：只能加減刀具數量（按 ＋／－ 後請按儲存）","ผู้ใช้ทั่วไป: ปรับจำนวนเครื่องมือได้อย่างเดียว (กด ＋／－ แล้วกดบันทึก)"],
+["輸入這個帳號的新密碼（至少 6 碼）","ใส่รหัสผ่านใหม่ของบัญชีนี้ (อย่างน้อย 6 ตัว)"],
+["最高庫存（超過警示，0 表示不限）","สต็อกสูงสุด (เกินแล้วเตือน, 0 = ไม่จำกัด)"],
+["註冊完成，請等管理員核准後再登入","สมัครเรียบร้อย โปรดรอผู้ดูแลระบบอนุมัติแล้วจึงเข้าสู่ระบบ"],
+["新增加工產品（可一次貼多筆，一行一個）","เพิ่มผลิตภัณฑ์ (วางได้หลายรายการ บรรทัดละ 1 รายการ)"],
+["新增加工產品（例：A123 支架）","เพิ่มผลิตภัณฑ์ (เช่น A123 ขายึด)"],
+["再按一次確定刪除（會從刀具移除）","กดอีกครั้งเพื่อยืนยันลบ (จะลบออกจากเครื่องมือ)"],
+["最近紀錄（刪除紀錄不會改庫存）","บันทึกล่าสุด (การลบบันทึกไม่เปลี่ยนสต็อก)"],
+["有未儲存的修改，請先儲存或取消","มีการแก้ไขที่ยังไม่บันทึก โปรดบันทึกหรือยกเลิกก่อน"],
+["唯讀模式：只有管理者可以修改","โหมดอ่านอย่างเดียว: ผู้ดูแลระบบเท่านั้นที่แก้ไขได้"],
+["此檔含完整資料，請勿公開部署","ไฟล์นี้มีข้อมูลครบ ห้ามนำไปเผยแพร่สาธารณะ"],
+["輸入你的新密碼（至少 6 碼）","ใส่รหัสผ่านใหม่ของคุณ (อย่างน้อย 6 ตัว)"],
+["欄還有內容，請先清空再刪除","คอลัมน์นี้ยังมีข้อมูล โปรดล้างก่อนลบ"],
+["列還有內容，請先清空再刪除","แถวนี้ยังมีข้อมูล โปรดล้างก่อนลบ"],
+["已載入 HTML 內嵌資料","โหลดข้อมูลที่ฝังใน HTML แล้ว"],
+["同時有其他更新，請再按一次","มีการอัปเดตพร้อมกัน โปรดกดอีกครั้ง"],
+["新分類名稱（例：鑽頭刀桿）","ชื่อหมวดใหม่ (เช่น ด้ามดอกสว่าน)"],
+["載入 HTML 內嵌資料","โหลดข้อมูลที่ฝังใน HTML"],
+["確定匯入（取代目前資料）","ยืนยันนำเข้า (แทนที่ข้อมูลปัจจุบัน)"],
+["照片儲存失敗，請稍後再試","บันทึกรูปไม่สำเร็จ โปรดลองใหม่ภายหลัง"],
+["完成後頁面會自動重新載入","เสร็จแล้วหน้าเว็บจะโหลดใหม่อัตโนมัติ"],
+["從現場機台圖匯入產品名稱","นำเข้าชื่อผลิตภัณฑ์จากผังเครื่องจักรหน้างาน"],
+["還原成 Excel 原值","คืนค่าเดิมจาก Excel"],
+["還有刀具的分類不能刪除。","หมวดที่ยังมีเครื่องมือลบไม่ได้"],
+["可新增加工刀具的分類","เพิ่มหมวดเครื่องมือตัดใหม่ได้"],
+["規格（材質/塗層/直徑）","สเป็ก (วัสดุ/การเคลือบ/เส้นผ่านศูนย์กลาง)"],
+["加工過的產品（可複選）","ผลิตภัณฑ์ที่เคยผลิต (เลือกได้หลายรายการ)"],
+["尚無產品，請在下方新增","ยังไม่มีผลิตภัณฑ์ โปรดเพิ่มด้านล่าง"],
+["登入已過期，請重新登入","การเข้าสู่ระบบหมดอายุ โปรดเข้าสู่ระบบใหม่"],
+["雲端目前是空的。請按「","ตอนนี้คลาวด์ว่างเปล่า โปรดกด「"],
+["匯入資料」選擇備份檔（","นำเข้าข้อมูล」แล้วเลือกไฟล์สำรอง ("],
+["），資料會存到雲端。","), ข้อมูลจะถูกเก็บบนคลาวด์"],
+["尚未有刀具用在這個產品","ยังไม่มีเครื่องมือที่ใช้กับผลิตภัณฑ์นี้"],
+["尚無加工產品，請先新增","ยังไม่มีผลิตภัณฑ์ โปรดเพิ่มก่อน"],
+["這些產品已經在清單裡了","ผลิตภัณฑ์เหล่านี้มีในรายการแล้ว"],
+["沒有新的產品名稱可匯入","ไม่มีชื่อผลิตภัณฑ์ใหม่ให้นำเข้า"],
+["還原載入前的本機資料","กู้คืนข้อมูลในเครื่องก่อนโหลด"],
+["搜尋型號、品牌、位置","ค้นหารุ่น ยี่ห้อ ตำแหน่ง"],
+["最低庫存（低於警示）","สต็อกขั้นต่ำ (ต่ำกว่าแล้วเตือน)"],
+["會自動記錄領用時間","ระบบจะบันทึกเวลาเบิกใช้อัตโนมัติ"],
+["匯出失敗，請稍後再試","ส่งออกไม่สำเร็จ โปรดลองใหม่ภายหลัง"],
+["這不是本程式的備份檔","นี่ไม่ใช่ไฟล์สำรองของโปรแกรมนี้"],
+["這個檔案沒有內嵌資料","ไฟล์นี้ไม่มีข้อมูลฝัง"],
+["登入後無法載入資料：","เข้าสู่ระบบแล้วแต่โหลดข้อมูลไม่ได้: "],
+["把目前資料存進頁面","บันทึกข้อมูลปัจจุบันลงในหน้าเว็บ"],
+["密碼（至少 6 碼）","รหัสผ่าน (อย่างน้อย 6 ตัว)"],
+["平均月用量（30天）","ปริมาณใช้เฉลี่ยต่อเดือน (30 วัน)"],
+["沒有可以復原的步驟","ไม่มีขั้นตอนให้ย้อนกลับ"],
+["找不到可還原的備份","ไม่พบข้อมูลสำรองที่กู้คืนได้"],
+["至少要保留一個分類","ต้องเหลืออย่างน้อย 1 หมวด"],
+["再按一次確定刪除","กดอีกครั้งเพื่อยืนยันลบ"],
+["天（編輯中可改）","วัน (แก้ไขได้ตอนแก้ไข)"],
+["套用為最低庫存（","ใช้เป็นสต็อกขั้นต่ำ ("],
+["無法讀取這張圖片","อ่านรูปภาพนี้ไม่ได้"],
+["這張圖裡找不到「","ไม่พบในผังนี้: 「"],
+["（含完整資料）","(รวมข้อมูลทั้งหมด)"],
+["型號 / 名稱","รุ่น / ชื่อ"],["品號 / 序號","รหัสสินค้า / ซีเรียล"],["（方便查詢）","(ช่วยค้นหา)"],
+["例：序號、料號","เช่น ซีเรียล, รหัสชิ้นส่วน"],["補貨交期（天）","ระยะเวลาสั่งซื้อ (วัน)"],
+["刀具管理 登入","จัดการเครื่องมือตัด – เข้าสู่ระบบ"],["沒有符合的刀具","ไม่พบเครื่องมือที่ตรงกัน"],
+["建議最低庫存","สต็อกขั้นต่ำที่แนะนำ"],["建議最低","ขั้นต่ำที่แนะนำ"],["檔案格式不正確","รูปแบบไฟล์ไม่ถูกต้อง"],
+["至少要保留一欄","ต้องเหลืออย่างน้อย 1 คอลัมน์"],["至少要保留一列","ต้องเหลืออย่างน้อย 1 แถว"],
+["位置圖歷史紀錄","ประวัติผังตำแหน่ง"],["雲端儲存失敗：","บันทึกบนคลาวด์ไม่สำเร็จ: "],["無法連線雲端：","เชื่อมต่อคลาวด์ไม่ได้: "],
+["沒有符合的產品","ไม่พบผลิตภัณฑ์ที่ตรงกัน"],["已經有這個產品","มีผลิตภัณฑ์นี้อยู่แล้ว"],["點一下修改產品","แตะเพื่อแก้ไขผลิตภัณฑ์"],
+["沒有想要的產品？在這裡新增","ไม่มีผลิตภัณฑ์ที่ต้องการ? เพิ่มที่นี่"],["已經有這個分類","มีหมวดนี้อยู่แล้ว"],
+["刪除最後一欄","ลบคอลัมน์สุดท้าย"],["刪除最後一列","ลบแถวสุดท้าย"],["一行一支刀桿","บรรทัดละ 1 ด้าม"],
+["未儲存（原 ","ยังไม่บันทึก (เดิม "],["同時調整庫存","ปรับสต็อกพร้อมกัน"],["再按一次刪除","กดอีกครั้งเพื่อลบ"],
+["同時扣減庫存","หักสต็อกพร้อมกัน"],["刀具管理備份","สำรองข้อมูลเครื่องมือ"],["正在把目前 ","กำลังบันทึก "],
+["新的產品名稱","ชื่อผลิตภัณฑ์ใหม่"],["加工產品清單","รายการผลิตภัณฑ์"],["目前加工產品","ผลิตภัณฑ์ที่กำลังผลิต"],
+["新的分類名稱","ชื่อหมวดใหม่"],["刀具管理","จัดการเครื่องมือตัด"],["車床位置圖","ผังตำแหน่งเครื่องกลึง"],["銑床位置圖","ผังตำแหน่งเครื่องมิลลิ่ง"],
+["復原上一步","ย้อนกลับขั้นก่อนหน้า"],["註冊新帳號","สมัครบัญชีใหม่"],["目前庫存","สต็อกปัจจุบัน"],["統計（近","สถิติ (ย้อนหลัง"],
+["平均週用量","ใช้เฉลี่ยต่อสัปดาห์"],["最高週用量","ใช้สูงสุดต่อสัปดาห์"],["建議安全量","ปริมาณสำรองที่แนะนำ"],["近 7 天","7 วันล่าสุด"],
+["備份內含 ","ไฟล์สำรองมี "],["更新失敗（","อัปเดตไม่สำเร็จ ("],["內嵌資料 ","ข้อมูลฝัง "],["登入失敗：","เข้าสู่ระบบไม่สำเร็จ: "],
+["註冊失敗：","สมัครไม่สำเร็จ: "],["載入失敗：","โหลดไม่สำเร็จ: "],["密碼已更新","เปลี่ยนรหัสผ่านแล้ว"],["更新失敗：","อัปเดตไม่สำเร็จ: "],
+["個產品名稱","ชื่อผลิตภัณฑ์"],["新產品名稱","ชื่อผลิตภัณฑ์ใหม่"],["重新整理","รีเฟรช"],["帳號管理","จัดการบัญชี"],
+["刀桿清單","รายการด้ามมีด"],["加工產品","ผลิตภัณฑ์ที่ผลิต"],["現場機台","เครื่องจักรหน้างาน"],["匯出資料","ส่งออกข้อมูล"],["匯入資料","นำเข้าข้อมูล"],
+["新增一欄","เพิ่มคอลัมน์"],["新增一列","เพิ่มแถว"],["歷史紀錄","ประวัติ"],["新增刀具","เพิ่มเครื่องมือ"],["移除照片","ลบรูปภาพ"],["庫存數量","จำนวนสต็อก"],
+["顯示密碼","แสดงรหัสผ่าน"],["車刀刀片","เม็ดมีดกลึง"],["車刀刀桿","ด้ามมีดกลึง"],["銑刀刀桿","ด้ามจับดอกมิลลิ่ง"],["刃端銑刀","เอนด์มิล"],
+["編輯分類","แก้ไขหมวด"],["加工過：","เคยผลิต: "],["庫存偏低","สต็อกต่ำ"],["庫存偏高","สต็อกสูง"],["還原自動","คืนค่าอัตโนมัติ"],
+["編輯刀具","แก้ไขเครื่องมือ"],["領用紀錄","บันทึกการเบิกใช้"],["新增紀錄","เพิ่มบันทึก"],["尚無紀錄","ยังไม่มีบันทึก"],["補貨交期","ระยะเวลาสั่งซื้อ"],
+["安全量","ปริมาณสำรอง"],["每週用量","ปริมาณใช้ต่อสัปดาห์"],["每月用量","ปริมาณใช้ต่อเดือน"],["補登領用","บันทึกการเบิกย้อนหลัง"],["領用時間","เวลาเบิกใช้"],
+["已匯出 ","ส่งออกแล้ว "],["已存成 ","บันทึกเป็น "],["已匯入 ","นำเข้าแล้ว "],["套筒錐度","เทเปอร์ปลอกจับ"],["套筒","ปลอกจับ"],
+["已復原：","ย้อนกลับแล้ว: "],["還原前（","ก่อนกู้คืน ("],["的版本）","เวอร์ชัน)"],["未知錯誤","ข้อผิดพลาดที่ไม่ทราบ"],["已同步 ","ซิงค์แล้ว "],
+["已載入 ","โหลดแล้ว "],["此帳號（","บัญชีนี้ ("],["重設密碼","รีเซ็ตรหัสผ่าน"],["密碼太短","รหัสผ่านสั้นเกินไป"],["新增產品","เพิ่มผลิตภัณฑ์"],
+["已新增：","เพิ่มแล้ว: "],["支刀具）","รายการ)"],["尚無產品","ยังไม่มีผลิตภัณฑ์"],["（空白）","(ว่าง)"],["機台編號","หมายเลขเครื่อง"],["改密碼","เปลี่ยนรหัสผ่าน"],
+["品號：","รหัสสินค้า: "],["銑床 ","เครื่องมิลลิ่ง "],["車床 ","เครื่องกลึง "],["已儲存","บันทึกแล้ว"],["週均 ","เฉลี่ย/สัปดาห์ "],["月均 ","เฉลี่ย/เดือน "],
+["未儲存","ยังไม่บันทึก"],["紀錄（","บันทึก ("],["交期 ","ระยะสั่งซื้อ "],["筆刀具","รายการ"],["雲端版","เวอร์ชันคลาวด์"],["未登入","ยังไม่เข้าสู่ระบบ"],
+["管理員","ผู้ดูแลระบบ"],["使用者","ผู้ใช้ทั่วไป"],["登入中","กำลังเข้าสู่ระบบ"],["註冊中","กำลังสมัคร"],["載入中","กำลังโหลด"],["待核准","รออนุมัติ"],
+["已重設","รีเซ็ตแล้ว"],["失敗：","ไม่สำเร็จ: "],["支刀具","รายการ"],["廠產品","โรงงาน"],["機台：","เครื่อง: "],["機台 ","เครื่อง "],
+["登出","ออกจากระบบ"],["新增","เพิ่ม"],["照片","รูปภาพ"],["類別","หมวดหมู่"],["品牌","ยี่ห้อ"],["備註","หมายเหตุ"],["取消","ยกเลิก"],["儲存","บันทึก"],
+["位置","ตำแหน่ง"],["關閉","ปิด"],["登入","เข้าสู่ระบบ"],["銑刀","ดอกมิลลิ่ง"],["確定","ตกลง"],["全部","ทั้งหมด"],["塗層","การเคลือบ"],["外徑","เส้นผ่านศูนย์กลางนอก"],
+["鎢鋼","ทังสเตนคาร์ไบด์"],["紀錄","บันทึก"],["編輯","แก้ไข"],["刪除","ลบ"],["領用","เบิกใช้"],["入庫","รับเข้า"],["類型","ประเภท"],["數量","จำนวน"],["時間","เวลา"],
+["用量","ปริมาณใช้"],["天前","วันก่อน"],["還原","กู้คืน"],["失敗","ไม่สำเร็จ"],["改名","เปลี่ยนชื่อ"],["產品","ผลิตภัณฑ์"],["刀具","เครื่องมือตัด"],["刀桿","ด้ามมีด"],["刀片","เม็ดมีด"],
+["密碼","รหัสผ่าน"],
+["產品清單","รายการผลิตภัณฑ์"],["刀壽與叫刀計算","อายุมีดและการคำนวณสั่งซื้อ"],["匯入 Excel（產品與刀壽）","นำเข้า Excel (ผลิตภัณฑ์และอายุมีด)"],["下載範本","ดาวน์โหลดแม่แบบ"],
+["匯出叫刀清單","ส่งออกรายการสั่งซื้อ"],["清空刀壽資料","ล้างข้อมูลอายุมีด"],["再按一次確定清空","กดอีกครั้งเพื่อยืนยันล้าง"],["叫刀計算設定","ตั้งค่าการคำนวณสั่งซื้อ"],
+["期間說明","ช่วงเวลา"],["安全係數","ตัวคูณความปลอดภัย"],["需求刀數 = 預計產量 ÷ 刀壽（無條件進位）。建議叫貨 = 需求刀數 × 安全係數 + 最低庫存 − 目前庫存，不足才叫。","จำนวนมีดที่ต้องใช้ = ปริมาณผลิต ÷ อายุมีด (ปัดขึ้น) ปริมาณสั่งซื้อที่แนะนำ = จำนวนที่ต้องใช้ × ตัวคูณ + สต็อกขั้นต่ำ − สต็อกปัจจุบัน สั่งเฉพาะเมื่อไม่พอ"],
+["請先匯入產品刀壽資料（Excel），或在下方手動新增一列","โปรดนำเข้าข้อมูลอายุมีดของผลิตภัณฑ์ (Excel) หรือเพิ่มแถวด้วยตนเองด้านล่าง"],
+["叫刀建議","คำแนะนำการสั่งซื้อมีด"],["刀具型號","รุ่นเครื่องมือตัด"],["最低庫存","สต็อกขั้นต่ำ"],["最高庫存","สต็อกสูงสุด"],["需求刀數","จำนวนที่ต้องใช้"],["建議叫貨","แนะนำสั่งซื้อ"],["使用產品","ผลิตภัณฑ์ที่ใช้"],
+["刀具清單內找不到","ไม่พบในรายการเครื่องมือ"],["庫存足夠","สต็อกเพียงพอ"],["產品刀壽資料（","ข้อมูลอายุมีดของผลิตภัณฑ์ ("],[" 列）"," แถว)"],["刀壽（件/刀）","อายุมีด (ชิ้น/ใบมีด)"],["預計產量","ปริมาณผลิตที่วางแผน"],
+["刀具型號","รุ่นเครื่องมือตัด"],["＋ 手動新增一列","＋ เพิ่มแถวด้วยตนเอง"],["產品和刀具型號都要填","ต้องกรอกผลิตภัณฑ์และรุ่นเครื่องมือ"],["已新增一列","เพิ่มแถวแล้ว"],["已清空刀壽資料","ล้างข้อมูลอายุมีดแล้ว"],
+["Excel 裡找不到資料","ไม่พบข้อมูลใน Excel"],["讀取 Excel 失敗：","อ่าน Excel ไม่สำเร็จ: "],["無法載入 Excel 解析程式，請確認網路","โหลดตัวอ่าน Excel ไม่ได้ โปรดตรวจสอบอินเทอร์เน็ต"],
+["對應 Excel 欄位","จับคู่คอลัมน์ Excel"],["請確認每個項目對應到 Excel 的哪一欄","โปรดตรวจสอบว่าแต่ละหัวข้อตรงกับคอลัมน์ใดใน Excel"],["產品欄位","คอลัมน์ผลิตภัณฑ์"],["刀具型號欄位","คอลัมน์รุ่นเครื่องมือ"],
+["刀壽欄位（每把刀可加工幾件）","คอลัมน์อายุมีด (มีด 1 ใบผลิตได้กี่ชิ้น)"],["預計產量欄位（可不選）","คอลัมน์ปริมาณผลิต (ไม่เลือกก็ได้)"],["（不使用）","(ไม่ใช้)"],["匯入方式","วิธีนำเข้า"],
+["取代現有資料","แทนที่ข้อมูลเดิม"],["合併加入","รวมเข้ากับข้อมูลเดิม"],["匯入","นำเข้า"],["列，新增 "," แถว เพิ่ม "],
+["現場機台圖","ผังเครื่องจักรหน้างาน"],["匯出 HTML","ส่งออก HTML"],["每月","ต่อเดือน"],["匯出","ส่งออก"],["點一下","แตะ"],["個產品","ผลิตภัณฑ์"],[" 列資料）"," แถว)"],["（共 ","(ทั้งหมด "]
+];
+TH.sort((a,b)=>b[0].length-a[0].length);
+let LANG="zh";try{LANG=localStorage.getItem("toollang")||"zh"}catch(e){}
+const ORG=new WeakMap();let trT=0;
+const trS=s=>{if(LANG!=="th")return s;for(const[z,t]of TH)if(s.includes(z))s=s.split(z).join(t);return s};
+function trApply(){const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
+ while(n=w.nextNode()){const p=n.parentNode&&n.parentNode.nodeName;if(p==="SCRIPT"||p==="STYLE")continue;const v=n.data;let o=ORG.get(n);if(!o||o.t!==v)o={z:v,t:v};const t=LANG==="th"?trS(o.z):o.z;if(t!==v)n.data=t;o.t=t;ORG.set(n,o)}
+ document.querySelectorAll("[placeholder],[title]").forEach(el=>{for(const a of["placeholder","title"]){if(!el.hasAttribute(a))continue;const k="oz"+a,cur=el.getAttribute(a);if(el.dataset[k]===undefined||el.dataset[k+"t"]!==cur)el.dataset[k]=cur;const t=LANG==="th"?trS(el.dataset[k]):el.dataset[k];el.dataset[k+"t"]=t;if(cur!==t)el.setAttribute(a,t)}})}
+new MutationObserver(()=>{clearTimeout(trT);trT=setTimeout(trApply,30)}).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","title"]});
+const langBtns=()=>document.querySelectorAll(".lgb");
+function setLang(l){LANG=l;try{localStorage.setItem("toollang",l)}catch(e){}langBtns().forEach(b=>{b.textContent=l==="th"?"中文":"ไทย"});trApply()}
+langBtns().forEach(b=>{b.textContent=LANG==="th"?"中文":"ไทย";b.onclick=()=>setLang(LANG==="th"?"zh":"th")});
+if(LANG==="th")trApply();
+
 $("a_sp").onchange=()=>{$("a_p").type=$("a_sp").checked?"text":"password"};
-$("pw").onclick=async()=>{const pw=prompt("輸入你的新密碼（至少 6 碼）：");if(!pw)return;if(pw.length<6){alert("密碼至少 6 碼");return}
- try{const r=await fetch(SB_URL+"/auth/v1/user",{method:"PUT",headers:Object.assign(H0(),{Authorization:"Bearer "+await tok()}),body:JSON.stringify({password:pw})});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.msg||j.message||("HTTP "+r.status))}alert("密碼已更新")}catch(e){alert("更新失敗："+e.message)}};
+$("pw").onclick=async()=>{const pw=await askText("輸入你的新密碼（至少 6 碼）","");if(!pw)return;if(pw.length<6){setSyn("密碼至少 6 碼",1);return}
+ try{const r=await fetch(SB_URL+"/auth/v1/user",{method:"PUT",headers:Object.assign(H0(),{Authorization:"Bearer "+await tok()}),body:JSON.stringify({password:pw})});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.msg||j.message||("HTTP "+r.status))}setSyn("✓ 密碼已更新")}catch(e){setSyn("⚠ 更新失敗："+e.message,1)}};
+let pTab="list",spClr=false,xrows=null,sref=null,SPEC={rows:[],factor:1,period:"每月"};
+try{const r=JSON.parse(localStorage.getItem("toolspec")||"null");if(r&&Array.isArray(r.rows))SPEC=Object.assign(SPEC,r)}catch(e){}
+function saveSpec(){touch();try{localStorage.setItem("toolspec",JSON.stringify(SPEC))}catch(e){}if(sref)sref.set(SPEC).catch(()=>{})}
+function loadXlsx(){return window.XLSX?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";s.onload=ok;s.onerror=()=>no(new Error("無法載入 Excel 解析程式，請確認網路"));document.head.appendChild(s)})}
+function calcNeed(){const m=new Map();for(const r of SPEC.rows){const l=+r.l,v=+r.v;if(!(l>0&&v>0)||!r.t)continue;const k=nz(r.t),e=m.get(k)||{t:r.t,need:0,ps:new Set()};e.need+=v/l;e.ps.add(r.p);m.set(k,e)}
+ return[...m.values()].map(e=>{const it=items.find(i=>nz(i.model)===nz(e.t)),need=Math.ceil(e.need*(+SPEC.factor||1)),qty=it?it.qty:0,min=it?(+it.min||0):0;return{t:e.t,it,need,qty,min,order:it?Math.max(0,need+min-qty):need,ps:[...e.ps]}}).sort((a,b)=>b.order-a.order)}
+function renderProdView(){const k=$("q").value.trim().toLowerCase(),adm=canW;
+ let h='<div class="row" style="margin:0 0 8px"><button class="'+(pTab==="list"?"p":"")+'" data-pt="list">產品清單</button><button class="'+(pTab==="spec"?"p":"")+'" data-pt="spec">刀壽與叫刀計算</button></div>';
+ if(pTab==="list"){const L=PRODS.map((p,i)=>[p,i]).filter(([p])=>!k||p.toLowerCase().includes(k));
+  h+=(adm?'<textarea id="pv_n" rows="2" placeholder="新增加工產品（可一次貼多筆，一行一個）"></textarea><div class="row"><button class="p" id="pv_a">＋ 新增產品</button><button id="pv_i">從現場機台圖匯入產品名稱</button></div>':"")+`<div id="pv_m" class="s" style="color:var(--warn)">${esc(prodMsg)}</div>`
+  +(L.length?L.map(([p,i])=>{const ts=items.filter(t=>(t.prods||[]).includes(p));return `<div class="card"><div class="top"><div class="m">${esc(p)}</div><span class="tag">${ts.length} 支刀具</span></div><div class="s">${ts.length?ts.map(t=>esc(t.model)+(t.pn?"（"+esc(t.pn)+"）":"")).join("、"):"尚未有刀具用在這個產品"}</div>${machLine(p)}${adm?`<div class="row"><button data-pr="${i}">改名</button><button data-pd="${i}"${pdel===p?' class="p" style="background:var(--warn);border-color:var(--warn)"':""}>${pdel===p?"再按一次確定刪除（會從刀具移除）":"刪除"}</button></div>`:""}</div>`}).join(""):'<div class="empty">'+(PRODS.length?"沒有符合的產品":"尚無加工產品，請先新增")+"</div>")}
+ else{const C=calcNeed();
+  if(adm)h+='<div class="row"><button class="p" id="sp_imp">⬆ 匯入 Excel（產品與刀壽）</button><button id="sp_tpl">下載範本</button><button id="sp_exp">匯出叫刀清單</button><button id="sp_clr"'+(spClr?' class="p" style="background:var(--warn);border-color:var(--warn)"':"")+'>'+(spClr?"再按一次確定清空":"清空刀壽資料")+'</button><input id="sp_file" type="file" accept=".xlsx,.xls,.csv" hidden></div>';
+  h+=`<div id="pv_m" class="s" style="color:var(--warn)">${esc(prodMsg)}</div><div class="card"><b>叫刀計算設定</b><div class="g"><div><label>期間說明</label><input id="sp_per" value="${esc(SPEC.period)}"${adm?"":" disabled"}></div><div><label>安全係數</label><input id="sp_fac" type="number" step="0.05" min="0.5" value="${SPEC.factor}"${adm?"":" disabled"}></div></div><div class="s">需求刀數 = 預計產量 ÷ 刀壽（無條件進位）。建議叫貨 = 需求刀數 × 安全係數 + 最低庫存 − 目前庫存，不足才叫。</div></div>`;
+  if(!SPEC.rows.length)h+='<div class="empty">請先匯入產品刀壽資料（Excel），或在下方手動新增一列</div>';
+  else{h+=`<div class="h">叫刀建議（${esc(SPEC.period)}）</div><div style="overflow-x:auto"><table class="tb"><tr><th>刀具型號</th><th>目前庫存</th><th>最低庫存</th><th>需求刀數</th><th>建議叫貨</th><th>使用產品</th></tr>`+C.map(c=>`<tr><td>${esc(c.t)}${c.it?"":' <span class="tag" style="color:var(--warn)">刀具清單內找不到</span>'}</td><td>${c.qty}</td><td>${c.min}</td><td>${c.need}</td><td><b style="color:${c.order>0?"var(--warn)":"#16a34a"}">${c.order>0?c.order:"庫存足夠"}</b></td><td>${esc(c.ps.join("、"))}</td></tr>`).join("")+"</table></div>"}
+  h+=`<div class="h">產品刀壽資料（${SPEC.rows.length} 列）</div>`+(adm?'<div class="g"><div><input id="sp_ap" placeholder="產品"></div><div><input id="sp_at" placeholder="刀具型號"></div><div><input id="sp_al" type="number" placeholder="刀壽（件/刀）"></div><div><input id="sp_av" type="number" placeholder="預計產量"></div></div><div class="row"><button id="sp_add">＋ 手動新增一列</button></div>':"");
+  const R=SPEC.rows.map((r,i)=>[r,i]).filter(([r])=>!k||(r.p+" "+r.t).toLowerCase().includes(k));
+  if(R.length)h+='<div style="overflow-x:auto"><table class="tb"><tr><th>產品</th><th>刀具型號</th><th>刀壽（件/刀）</th><th>預計產量</th><th>需求刀數</th>'+(adm?"<th></th>":"")+"</tr>"+R.map(([r,i])=>`<tr><td>${esc(r.p)}</td><td>${esc(r.t)}</td><td>${adm?`<input type="number" min="0" data-si="${i}" data-sf="l" value="${r.l}">`:r.l}</td><td>${adm?`<input type="number" min="0" data-si="${i}" data-sf="v" value="${r.v}">`:r.v}</td><td>${r.l>0&&r.v>0?Math.ceil(r.v/r.l):"-"}</td>${adm?`<td><button data-sd="${i}">刪除</button></td>`:""}</tr>`).join("")+"</table></div>"}
+ $("prodv").innerHTML=h}
+function addProdV(){if(!canW)return;const names=$("pv_n").value.split(/[\n，、,;；]+/).map(x=>x.trim()).filter(Boolean);if(!names.length)return;const add=names.filter((n,i)=>!PRODS.includes(n)&&names.indexOf(n)===i);add.forEach(n=>PRODS.push(n));if(add.length)saveProds();prodMsg=add.length?"✓ 已新增："+add.join("、"):"這些產品已經在清單裡了";renderProdView()}
+async function spFile(f){try{await loadXlsx();const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});let rows=[];for(const n of wb.SheetNames){const r=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:"",blankrows:false});if(r.length>1){rows=r;break}}
+ if(rows.length<2){prodMsg="Excel 裡找不到資料";return renderProdView()}
+ let hi=0;for(let i=0;i<Math.min(10,rows.length);i++){if(rows[i].filter(x=>String(x).trim()).length>=2){hi=i;break}}
+ xrows={h:rows[hi].map(x=>String(x).trim()),d:rows.slice(hi+1)};openXmap()}catch(e){prodMsg="讀取 Excel 失敗："+e.message;renderProdView()}}
+function guessCols(h){const f=(re,ex)=>h.findIndex((x,i)=>re.test(x)&&!(ex||[]).includes(i));const l=f(/刀壽|壽命|life|可加工|加工數|每刀|件\/刀/i),p=f(/產品|品名|品號|料號|part|product/i,[l]),t=f(/刀具|刀片|刀桿|型號|tool|insert|刀/i,[l,p]),v=f(/產量|需求|計畫|預計|數量|volume|qty|demand|月/i,[l,p,t]);return{p,t,l,v}}
+function openXmap(){const g=guessCols(xrows.h),d=$("xdlg"),opt=(s,none)=>(none?'<option value="-1">（不使用）</option>':"")+xrows.h.map((x,i)=>`<option value="${i}"${i===s?" selected":""}>${esc(x||"Col "+(i+1))}</option>`).join("");
+ d.innerHTML=`<b>對應 Excel 欄位</b><div class="s">請確認每個項目對應到 Excel 的哪一欄（共 ${xrows.d.length} 列資料）。</div><label>產品欄位</label><select id="xm_p">${opt(g.p)}</select><label>刀具型號欄位</label><select id="xm_t">${opt(g.t)}</select><label>刀壽欄位（每把刀可加工幾件）</label><select id="xm_l">${opt(g.l)}</select><label>預計產量欄位（可不選）</label><select id="xm_v">${opt(g.v,1)}</select><label>匯入方式</label><select id="xm_mode"><option value="replace">取代現有資料</option><option value="merge">合併加入</option></select><div class="row"><button id="xm_x" style="margin-left:auto">取消</button><button class="p" id="xm_ok">匯入</button></div>`;if(!d.open)d.showModal()}
+$("xdlg").onclick=e=>{const id=e.target.id;if(id==="xm_x")return $("xdlg").close();if(id!=="xm_ok"||!canW)return;
+ const ci=k=>+$("xm_"+k).value,P=ci("p"),T=ci("t"),Lc=ci("l"),V=ci("v"),num=x=>{const n=parseFloat(String(x).replace(/[, ]/g,""));return isFinite(n)?n:0};
+ const rows=xrows.d.map(r=>({p:String(r[P]??"").trim(),t:String(r[T]??"").trim(),l:num(r[Lc]),v:V>=0?num(r[V]):0})).filter(r=>r.p||r.t);
+ if($("xm_mode").value==="replace")SPEC.rows=rows;else{const m=new Map(SPEC.rows.map(r=>[nz(r.p)+"|"+nz(r.t),r]));rows.forEach(r=>m.set(nz(r.p)+"|"+nz(r.t),r));SPEC.rows=[...m.values()]}
+ const np=[...new Set(rows.map(r=>r.p).filter(x=>x&&!PRODS.includes(x)))];np.forEach(x=>PRODS.push(x));if(np.length)saveProds();saveSpec();$("xdlg").close();prodMsg="✓ 已匯入 "+rows.length+" 列，新增 "+np.length+" 個產品";pTab="spec";renderProdView()};
+async function spTpl(){try{await loadXlsx();const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["產品","刀具型號","刀壽(件/刀)","預計產量(件/月)"],["V4-1200","CNMG120408",200,3000],["V4-1301+1302","CNMG120408",150,1800]]),"產品刀壽");XLSX.writeFile(wb,"加工產品刀壽範本.xlsx")}catch(e){prodMsg=e.message;renderProdView()}}
+async function spExp(){try{await loadXlsx();const C=calcNeed(),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["刀具型號","目前庫存","最低庫存","需求刀數("+SPEC.period+")","建議叫貨","使用產品"]].concat(C.map(c=>[c.t,c.qty,c.min,c.need,c.order,c.ps.join("、")]))),"叫刀清單");XLSX.writeFile(wb,"叫刀清單.xlsx")}catch(e){prodMsg=e.message;renderProdView()}}
+$("prodv").onclick=async e=>{const t=e.target;if(t.dataset.pt){pTab=t.dataset.pt;prodMsg="";spClr=false;renderProdView();return}if(!canW)return;
+ if(t.id==="pv_a")return addProdV();
+ if(t.id==="pv_i"){const nm=facProducts().filter(p=>!PRODS.includes(p));nm.forEach(p=>PRODS.push(p));if(nm.length)saveProds();prodMsg=nm.length?"✓ 已匯入 "+nm.length+" 個產品名稱":"沒有新的產品名稱可匯入";return renderProdView()}
+ if(t.id==="sp_imp")return $("sp_file").click();if(t.id==="sp_tpl")return spTpl();if(t.id==="sp_exp")return spExp();
+ if(t.id==="sp_clr"){if(!spClr){spClr=true;renderProdView();return}spClr=false;SPEC.rows=[];saveSpec();prodMsg="已清空刀壽資料";renderProdView();return}
+ if(t.id==="sp_add"){const p=$("sp_ap").value.trim(),tt=$("sp_at").value.trim();if(!p||!tt){prodMsg="產品和刀具型號都要填";renderProdView();return}SPEC.rows.push({p,t:tt,l:+$("sp_al").value||0,v:+$("sp_av").value||0});if(!PRODS.includes(p)){PRODS.push(p);saveProds()}saveSpec();prodMsg="✓ 已新增一列";renderProdView();return}
+ if(t.dataset.sd!==undefined){SPEC.rows.splice(+t.dataset.sd,1);saveSpec();renderProdView();return}
+ if(t.dataset.pr!==undefined){const old=PRODS[+t.dataset.pr],n=await askText("新的產品名稱",old);if(!n||n===old)return;if(PRODS.includes(n)){prodMsg="已經有這個產品";renderProdView();return}
+  PRODS[+t.dataset.pr]=n;items.forEach(it=>{if(it.prods&&it.prods.includes(old))it.prods=it.prods.map(x=>x===old?n:x)});Object.values(FAC.ov).forEach(o=>{if(o.p===old)o.p=n});SPEC.rows.forEach(r=>{if(r.p===old)r.p=n});saveProds();saveFac();saveSpec();save();render();return}
+ if(t.dataset.pd!==undefined){const p=PRODS[+t.dataset.pd];if(items.some(i=>(i.prods||[]).includes(p))&&pdel!==p){pdel=p;renderProdView();return}
+  pdel=null;PRODS.splice(+t.dataset.pd,1);items.forEach(it=>{if(it.prods)it.prods=it.prods.filter(x=>x!==p)});saveProds();save();render()}};
+$("prodv").onchange=e=>{if(!canW)return;const t=e.target;
+ if(t.id==="sp_file"){const f=t.files[0];t.value="";if(f)spFile(f);return}
+ if(t.id==="sp_per"){SPEC.period=t.value.trim()||"每月";saveSpec();renderProdView();return}
+ if(t.id==="sp_fac"){SPEC.factor=Math.max(.5,+t.value||1);saveSpec();renderProdView();return}
+ if(t.dataset.sf){const r=SPEC.rows[+t.dataset.si];if(r){r[t.dataset.sf]=Math.max(0,+t.value||0);saveSpec();renderProdView()}}};
+$("v_p").onclick=()=>{view="p";focusK=null;pdel=null;prodMsg="";render()};
+function openProds(){const d=$("pldg"),cnt=p=>items.filter(i=>(i.prods||[]).includes(p)).length;
+ d.innerHTML='<b>加工產品清單</b><div class="s">在這裡新增產品，編輯刀具時就能用選項勾選。</div>'+(PRODS.length?PRODS.map((p,i)=>`<div class="r"><span>${esc(p)}（${cnt(p)} 支刀具）</span><span><button data-r="${i}">改名</button> <button data-k="${i}">刪除</button></span></div>`).join(""):'<div class="empty">尚無產品</div>')+'<div class="row"><input id="pl_n" placeholder="新產品名稱"><button class="p" data-k="add">新增</button></div><div id="pl_m" class="s" style="color:var(--warn)"></div><div class="row"><button data-k="x" style="margin-left:auto">關閉</button></div>';if(!d.open)d.showModal()}
+$("pldg").onclick=async e=>{if(!canW)return;const r=e.target.dataset.r,k=e.target.dataset.k;
+ if(r!==undefined){const old=PRODS[+r],n=await askText("新的產品名稱",old);if(!n||n===old)return;if(PRODS.includes(n)){$("pl_m").textContent="已經有這個產品";return}
+  PRODS[+r]=n;items.forEach(it=>{if(it.prods&&it.prods.includes(old))it.prods=it.prods.map(x=>x===old?n:x)});saveProds();save();render();openProds();return}
+ if(k===undefined)return;if(k==="x")return $("pldg").close();
+ if(k==="add"){const n=$("pl_n").value.trim();if(!n)return;if(PRODS.includes(n)){$("pl_m").textContent="已經有這個產品";return}PRODS.push(n);saveProds();openProds();return}
+ const p=PRODS[+k];if(items.some(i=>(i.prods||[]).includes(p))&&pdel!==p){pdel=p;$("pl_m").textContent="「"+p+"」已用在刀具上，再按一次「刪除」會一併從這些刀具移除";return}
+ pdel=null;PRODS.splice(+k,1);items.forEach(it=>{if(it.prods)it.prods=it.prods.filter(x=>x!==p)});saveProds();save();render();openProds()};
+const FACT={"A廠產品":{"cols":[9,31,68,68,68,68,68,68,68,68,68,31,68,68,68,68,68,68,68,68,68,23,9,68,68,68,68,68,68,68],"rows":[40,40,40,40,6,21,21,21,21,22,22,22,22,21,21,22,21,22,22,23,22,21,21,22,23,22,23,22,23,21,22,20,22,20,22,21,22,20,22,27,22,21,22,21,22,20,22,22,22,21,22,22,22,22,22,21,21,21,21,21,21,21,21,22,21,22,22,22,22,21,21,21,27,27,21,21,21,21,22,21,20,20,20,20],"cells":[[1,1,1,1,"早班 08:00-17:00","",0,11,0,""],[1,2,2,21,"A廠產品","",1,26,15,"center"],[2,1,1,1,"","",0,11,3,""],[3,1,1,1,"","",0,11,1,""],[3,2,2,21,"泰國廠A","",1,26,15,"center"],[4,1,1,1,"","",0,11,1,""],[5,1,1,1,"","",0,11,1,""],[5,2,1,1,"","",1,11,1,""],[5,22,1,1,"","",1,11,4,""],[6,1,1,1,"","",0,11,1,""],[6,2,1,1,"","",1,11,1,""],[6,4,1,1,"V4-1303","",1,11,0,"center"],[6,6,1,1,"V4-1200","",1,11,0,"center"],[6,8,1,1,"V4-1200","",1,11,0,"center"],[6,10,1,1,"V4-1200","",1,11,0,"center"],[6,12,1,1,"","",1,11,3,"center"],[6,13,1,1,"分電6","",1,11,15,"center"],[6,15,1,2,"380V主電箱","",1,11,15,"center"],[6,21,1,1,"飲水機","",1,11,15,"center"],[6,22,1,1,"","",1,11,4,""],[7,1,1,1,"","",0,11,1,""],[7,2,1,1,"","",1,11,1,""],[7,4,2,1,"TB12","#70ad47",1,12,15,"center"],[7,6,2,1,"TA020","#00B0F0",1,12,15,"center"],[7,7,1,1,"","#00B0F0",1,12,0,"center"],[7,8,2,1,"TA019","#00B0F0",1,12,15,"center"],[7,9,1,1,"","#00B0F0",1,12,0,"center"],[7,10,2,1,"TA018","#00B0F0",1,12,15,"center"],[7,12,1,1,"","",1,11,5,""],[7,22,1,1,"","",1,11,4,""],[8,1,1,1,"","",0,11,1,""],[8,2,1,1,"","",1,11,1,""],[8,7,1,1,"","#00B0F0",1,12,0,"center"],[8,9,1,1,"","#00B0F0",1,12,0,"center"],[8,12,1,1,"","",1,11,5,""],[8,13,1,1,"","",1,20,1,""],[8,22,1,1,"","",1,11,4,""],[9,1,1,1,"","",0,11,1,""],[9,2,1,1,"","",1,11,1,""],[9,4,1,1,"","#70ad47",1,12,0,""],[9,10,1,1,"","#00B0F0",1,12,0,"center"],[9,12,1,1,"","",1,11,5,""],[9,13,1,1,"","",1,11,1,""],[9,22,1,1,"","",1,11,4,""],[10,1,1,1,"","",0,11,1,""],[10,2,1,1,"","",1,11,1,""],[10,4,1,1,"","#70ad47",1,12,0,"center"],[10,10,1,1,"","#00B0F0",1,12,0,"center"],[10,12,1,1,"","",1,11,5,""],[10,13,2,2,"油水:","",1,20,1,"right"],[10,22,1,1,"","",1,11,4,""],[11,1,1,1,"","",0,11,1,""],[11,2,2,1,"分\n電\n5","",1,8,15,"center"],[11,4,1,1,"V4-1301+1302","#70ad47",1,11,0,"center"],[11,7,1,1,"V4-1301+1302","",1,11,0,"center"],[11,10,1,1,"V4-1200","#00B0F0",1,11,0,"center"],[11,12,1,1,"","",1,11,5,""],[11,22,1,1,"","",1,11,4,""],[12,1,1,1,"","",0,11,1,""],[12,4,2,1,"TB11","#70ad47",1,12,15,"center"],[12,5,1,1,"","#70ad47",1,12,0,"center"],[12,6,1,1,"","#70ad47",1,12,0,""],[12,7,2,1,"TB10","#70ad47",1,12,15,"center"],[12,10,2,1,"TA021","#00B0F0",1,12,15,"center"],[12,12,1,1,"","",1,11,5,""],[12,13,2,2,"培訓技士:","",1,18,1,"right"],[12,22,1,1,"","",1,11,4,""],[13,1,1,1,"","",0,11,1,""],[13,2,1,1,"","",1,11,1,""],[13,5,1,1,"","#70ad47",1,12,0,"center"],[13,6,1,1,"","#70ad47",1,12,0,""],[13,12,1,1,"","",1,11,5,""],[13,22,1,1,"","",1,11,4,""],[14,1,1,1,"","",0,11,1,""],[14,2,1,1,"","",1,11,1,""],[14,12,1,1,"","",1,11,5,""],[14,13,2,2,"幹部:","",1,18,1,"right"],[14,22,8,1,"捲\n門","",1,11,15,"center"],[15,1,1,1,"","",0,11,1,""],[15,2,1,1,"","",1,11,1,""],[15,12,1,1,"","",1,11,5,""],[16,1,1,1,"","",0,11,1,""],[16,2,1,1,"","",1,11,1,""],[16,4,1,1,"V4-1200","",1,11,0,"center"],[16,7,1,1,"V4-1301+1302","",1,11,0,"center"],[16,10,1,1,"V4-1301+1302","",1,11,0,"center"],[16,12,1,1,"","",1,11,5,""],[17,1,1,1,"","",0,11,1,""],[17,2,1,1,"","",1,11,1,""],[17,4,2,1,"TA078","#00B0F0",1,12,15,"center"],[17,7,2,1,"TB16","#70ad47",1,12,15,"center"],[17,8,1,1,"","#70ad47",1,12,0,""],[17,9,1,1,"","#70ad47",1,12,0,""],[17,10,2,1,"TB17","#70ad47",1,12,15,"center"],[17,12,1,1,"","",1,11,5,""],[18,1,1,1,"","",0,11,1,""],[18,2,1,1,"","",1,11,1,""],[18,8,1,1,"","#70ad47",1,12,0,""],[18,9,1,1,"","#70ad47",1,12,0,""],[18,12,1,1,"","",1,11,5,""],[19,1,1,1,"","",0,11,1,""],[19,2,1,1,"","",1,11,1,""],[19,4,1,1,"","#00B0F0",1,12,0,""],[19,10,1,1,"","#70ad47",1,12,0,""],[19,12,1,1,"","",1,11,5,""],[20,1,1,1,"","",0,11,1,""],[20,2,1,1,"","",1,11,1,""],[20,4,1,1,"","#00B0F0",1,12,0,""],[20,10,1,1,"","#70ad47",1,12,0,""],[20,12,1,1,"","",1,11,5,""],[20,19,1,1,"TMP","",1,12,0,"center"],[21,1,1,1,"","",0,11,1,""],[21,2,1,1,"","",1,11,1,""],[21,4,1,1,"V4-1200","#00B0F0",1,11,0,"center"],[21,6,1,1,"V4-1200","",1,11,0,"center"],[21,8,1,1,"V4-1200","",1,11,0,"center"],[21,10,1,1,"V4-1303","#70ad47",1,11,0,"center"],[21,12,1,1,"","",1,11,5,""],[21,16,1,1,"","#bdd7ee",1,12,0,""],[21,17,1,1,"","#bdd7ee",1,12,0,""],[21,18,1,1,"","#bdd7ee",1,12,0,""],[21,19,4,1,"龍\n門\nTA062","#bdd7ee",1,12,15,"center"],[22,1,1,1,"","",0,11,1,""],[22,2,1,1,"","",1,11,1,""],[22,4,2,1,"TA075","#00B0F0",1,12,15,"center"],[22,5,1,1,"","#00B0F0",1,12,0,""],[22,6,2,1,"TA076","#00B0F0",1,12,15,"center"],[22,7,1,1,"","#00B0F0",1,12,0,""],[22,8,2,1,"TA077","#00B0F0",1,12,15,"center"],[22,10,2,1,"TB18","#70ad47",1,12,15,"center"],[22,12,1,1,"","",1,11,5,""],[22,16,1,1,"","#bdd7ee",1,12,0,""],[22,17,1,1,"","#bdd7ee",1,12,0,""],[22,18,1,1,"","#bdd7ee",1,12,0,""],[22,22,1,1,"","",1,11,4,""],[23,1,1,1,"","",0,11,1,""],[23,2,2,1,"分\n電\n4","",1,8,7,"center"],[23,5,1,1,"","#00B0F0",1,12,0,""],[23,7,1,1,"","#00B0F0",1,12,0,""],[23,12,2,1,"分\n電\n 7","",1,8,15,"center"],[23,16,1,1,"","#bdd7ee",1,12,0,""],[23,17,1,1,"","#bdd7ee",1,12,0,""],[23,18,1,1,"","#bdd7ee",1,12,0,""],[23,22,2,1,"分\n電\n8","",1,8,15,"center"],[24,1,1,1,"","",0,11,1,""],[24,16,1,1,"","#bdd7ee",1,12,0,""],[24,17,1,1,"","#bdd7ee",1,12,0,""],[24,18,1,1,"","#bdd7ee",1,12,0,""],[25,1,1,1,"220V\n主電","",0,11,0,""],[25,2,3,1,"220V\n主電","",1,11,15,"center"],[25,4,1,1,"V4-1200","",1,11,0,"center"],[25,6,1,1,"V4-1200","",1,11,0,"center"],[25,8,1,1,"V4-1200","",1,11,0,"center"],[25,12,1,1,"","",1,11,5,""],[25,16,1,1,"","#bdd7ee",1,12,0,""],[25,17,1,1,"","#bdd7ee",1,12,0,""],[25,18,1,1,"","#bdd7ee",1,12,0,""],[25,19,1,1,"","#bdd7ee",1,12,0,""],[25,22,1,1,"","",1,11,4,""],[26,4,2,1,"TA072","#00B0F0",1,12,15,"center"],[26,5,1,1,"","#00B0F0",1,12,0,""],[26,6,2,1,"TA073","#00B0F0",1,12,15,"center"],[26,7,1,1,"","#00B0F0",1,12,0,""],[26,8,2,1,"TA074","#00B0F0",1,12,15,"center"],[26,12,1,1,"","",1,11,5,""],[26,16,1,1,"","#bdd7ee",1,12,0,""],[26,17,1,1,"","#bdd7ee",1,12,0,""],[26,18,1,1,"","#bdd7ee",1,12,0,""],[26,19,1,1,"","#bdd7ee",1,12,0,""],[26,22,1,1,"","",1,11,4,""],[27,5,1,1,"","#00B0F0",1,12,0,""],[27,7,1,1,"","#00B0F0",1,12,0,""],[27,12,1,1,"","",1,11,5,""],[27,16,1,1,"TMP","#bdd7ee",1,12,0,"center"],[27,17,1,1,"","#bdd7ee",1,12,0,""],[27,18,1,1,"","#bdd7ee",1,12,0,""],[27,19,1,1,"TMP","#bdd7ee",1,12,0,"center"],[27,22,1,1,"","",1,11,4,""],[28,1,1,1,"","",0,11,1,""],[28,2,1,1,"","",1,11,1,""],[28,12,1,1,"","",1,11,5,""],[28,16,4,1,"龍\n門\nTA059","#bdd7ee",1,12,15,"center"],[28,17,1,1,"","#bdd7ee",1,12,0,""],[28,18,1,1,"","#bdd7ee",1,12,0,""],[28,19,4,1,"龍\n門\nTA062","#bdd7ee",1,12,15,"center"],[28,22,1,1,"","",1,11,4,""],[29,1,1,1,"","",0,11,1,""],[29,2,1,1,"","",1,11,1,""],[29,4,1,1,"V4-1301+1302","",1,11,0,"center"],[29,6,1,1,"V4-1301+1302","",1,11,0,"center"],[29,8,1,1,"V4-1301+1302","",1,11,0,"center"],[29,12,1,1,"","",1,11,5,""],[29,17,1,1,"","#bdd7ee",1,12,0,""],[29,18,1,1,"","#bdd7ee",1,12,0,""],[29,22,1,1,"","",1,11,4,""],[30,1,1,1,"","",0,11,1,""],[30,2,1,1,"","",1,11,1,""],[30,4,2,1,"TB13","#00B0F0",1,12,15,"center"],[30,5,1,1,"","#00B0F0",1,12,0,""],[30,6,2,1,"TB14","#00B0F0",1,12,15,"center"],[30,7,1,1,"","#00B0F0",1,12,0,""],[30,8,2,1,"TB15","#00B0F0",1,12,15,"center"],[30,11,1,1,"","#ffffff",1,11,0,""],[30,12,1,1,"","",1,11,5,""],[30,17,1,1,"","#bdd7ee",1,12,0,""],[30,18,1,1,"","#bdd7ee",1,12,0,""],[30,22,1,1,"","",1,11,4,""],[31,1,1,1,"","",0,11,1,""],[31,2,1,1,"","",1,11,1,""],[31,5,1,1,"","#00B0F0",1,12,0,""],[31,7,1,1,"","#00B0F0",1,12,0,""],[31,12,1,1,"","",1,11,5,""],[31,17,1,1,"","#bdd7ee",1,12,0,""],[31,18,1,1,"","#bdd7ee",1,12,0,""],[31,22,1,1,"","",1,11,4,""],[32,1,1,1,"","",0,11,1,""],[32,2,1,1,"","",1,11,1,""],[32,12,1,1,"","",1,11,5,""],[32,16,1,1,"","#bdd7ee",1,12,0,""],[32,17,1,1,"","#bdd7ee",1,12,0,""],[32,18,1,1,"","#bdd7ee",1,12,0,""],[32,19,1,1,"","#bdd7ee",1,12,0,""],[32,22,1,1,"","",1,11,4,""],[33,1,1,1,"","",0,11,1,""],[33,2,1,1,"","",1,11,1,""],[33,4,1,1,"V4-1200","",1,11,0,"center"],[33,6,1,1,"V4-1200","",1,11,0,"center"],[33,8,1,1,"V4-1200","",1,11,0,"center"],[33,12,1,1,"","",1,11,5,""],[33,16,1,1,"","#bdd7ee",1,12,0,""],[33,17,1,1,"","#bdd7ee",1,12,0,""],[33,18,1,1,"","#bdd7ee",1,12,0,""],[33,19,1,1,"","#bdd7ee",1,12,0,""],[33,22,1,1,"","",1,11,4,""],[34,1,1,1,"","",0,11,1,""],[34,2,1,1,"","",1,11,1,""],[34,4,2,1,"TA011","#00B0F0",1,12,15,"center"],[34,5,1,1,"","#00B0F0",1,12,0,""],[34,6,2,1,"TA010","#00B0F0",1,12,15,"center"],[34,7,1,1,"","#00B0F0",1,12,0,""],[34,8,2,1,"TA055","#00B0F0",1,12,15,"center"],[34,10,2,1,"","",1,12,0,"center"],[34,12,1,1,"","",1,11,5,""],[34,16,1,1,"TMP","#bdd7ee",1,12,0,"center"],[34,17,1,1,"","#bdd7ee",1,12,0,""],[34,18,1,1,"","#bdd7ee",1,12,0,""],[34,19,1,1,"TMP","#bdd7ee",1,12,0,"center"],[34,22,1,1,"","",1,11,4,""],[35,1,1,1,"","",0,11,1,""],[35,2,1,1,"","",1,11,1,""],[35,5,1,1,"","#00B0F0",1,12,0,""],[35,7,1,1,"","#00B0F0",1,12,0,""],[35,12,1,1,"","",1,11,5,""],[35,16,4,1,"龍\n門\nTA060","#bdd7ee",1,12,15,"center"],[35,17,1,1,"","#bdd7ee",1,12,0,""],[35,18,1,1,"","#bdd7ee",1,12,0,""],[35,19,4,1,"龍\n門\nTA063","#bdd7ee",1,12,15,"center"],[35,22,1,1,"","",1,11,4,""],[36,1,1,1,"","",0,11,1,""],[36,2,1,1,"","",1,11,1,""],[36,12,1,1,"","",1,11,5,""],[36,17,1,1,"","#bdd7ee",1,12,0,""],[36,18,1,1,"","#bdd7ee",1,12,0,""],[36,22,1,1,"","",1,11,4,""],[37,1,1,1,"","",0,11,1,""],[37,2,1,1,"","",1,11,1,""],[37,4,1,1,"V4-1301+1302","",1,11,0,"center"],[37,6,1,1,"V4-1301+1302","",1,11,0,"center"],[37,8,1,1,"V4-1303","",1,11,0,"center"],[37,12,1,1,"","",1,11,5,""],[37,17,1,1,"","#bdd7ee",1,12,0,""],[37,18,1,1,"","#bdd7ee",1,12,0,""],[37,22,1,1,"","",1,11,4,""],[38,1,1,1,"","",0,11,1,""],[38,2,2,1,"分\n電\n3","",1,8,15,"center"],[38,4,2,1,"TB019","#00B0F0",1,12,15,"center"],[38,5,1,1,"","#00B0F0",1,12,0,""],[38,6,2,1,"TB020","#00B0F0",1,12,15,"center"],[38,7,1,1,"","#00B0F0",1,12,0,""],[38,8,2,1,"TB021","#00B0F0",1,12,15,"center"],[38,10,2,1,"","",1,12,0,"center"],[38,12,2,1,"分\n電\n 9","",1,8,15,"center"],[38,17,1,1,"","#bdd7ee",1,12,0,""],[38,18,1,1,"","#bdd7ee",1,12,0,""],[38,22,1,1,"","",1,11,4,""],[39,1,1,1,"","",0,11,1,""],[39,5,1,1,"","#00B0F0",1,12,0,""],[39,7,1,1,"","#00B0F0",1,12,0,""],[39,15,2,1,"","",1,11,0,"center"],[39,16,1,1,"","#bdd7ee",1,12,0,""],[39,17,1,1,"","#bdd7ee",1,12,0,""],[39,18,1,1,"","#bdd7ee",1,12,0,""],[39,19,1,1,"","#bdd7ee",1,12,0,""],[39,22,1,1,"","",1,11,4,""],[40,1,1,1,"","",0,11,1,""],[40,2,1,1,"","",1,11,1,""],[40,4,1,2,"TMP","",1,12,8,"center"],[40,7,1,2,"TMP","",1,12,8,"center"],[40,12,1,1,"","",1,11,5,""],[40,16,1,1,"","#bdd7ee",1,12,0,""],[40,17,1,1,"","#bdd7ee",1,12,0,""],[40,18,1,1,"","#bdd7ee",1,12,0,""],[40,19,1,1,"","#bdd7ee",1,12,0,""],[40,22,1,1,"","",1,11,4,""],[41,1,1,1,"","",0,11,1,""],[41,2,7,1,"鐵\n捲\n門","",1,11,7,"center"],[41,4,3,2,"龍門TA065","#bdd7ee",1,12,15,"center"],[41,6,2,1,"","#bdd7ee",1,12,0,"center"],[41,7,3,2,"龍門TA058","#bdd7ee",1,12,15,"center"],[41,9,1,1,"","#bdd7ee",1,12,0,""],[41,10,1,1,"","#bdd7ee",1,12,0,""],[41,11,1,1,"","#bdd7ee",1,11,0,""],[41,12,1,1,"","#bdd7ee",1,11,5,""],[41,13,1,1,"","#bdd7ee",1,11,0,""],[41,14,1,1,"","#bdd7ee",1,11,0,""],[41,15,1,1,"","#bdd7ee",1,11,0,""],[41,16,1,1,"TMP","#bdd7ee",1,12,0,"center"],[41,17,1,1,"","#bdd7ee",1,12,0,""],[41,18,1,1,"","#bdd7ee",1,12,0,""],[41,19,1,1,"TMP","#bdd7ee",1,12,0,"center"],[41,22,1,1,"","",1,11,4,""],[42,1,1,1,"","",0,11,1,""],[42,9,1,1,"","#bdd7ee",1,12,0,""],[42,10,1,1,"","#bdd7ee",1,12,0,""],[42,11,1,1,"","#bdd7ee",1,11,0,""],[42,12,1,1,"","#bdd7ee",1,11,5,""],[42,13,1,1,"","#bdd7ee",1,11,0,""],[42,14,1,1,"","#bdd7ee",1,11,0,""],[42,15,1,1,"","#bdd7ee",1,11,0,""],[42,16,4,1,"龍\n門\nTA067","#bdd7ee",1,12,15,"center"],[42,17,1,1,"","#bdd7ee",1,12,0,""],[42,18,1,1,"","#bdd7ee",1,12,0,""],[42,19,4,1,"龍\n門\nTA064","#bdd7ee",1,12,15,"center"],[42,22,1,1,"","",1,11,4,""],[43,1,1,1,"","",0,11,1,""],[43,6,1,1,"","#bdd7ee",1,12,0,""],[43,9,1,1,"","#bdd7ee",1,12,0,""],[43,10,1,1,"","#bdd7ee",1,12,0,""],[43,11,1,1,"","#bdd7ee",1,11,0,""],[43,12,1,1,"","#bdd7ee",1,11,5,""],[43,13,1,1,"","#bdd7ee",1,11,0,""],[43,14,1,1,"","#bdd7ee",1,11,0,""],[43,15,1,1,"","#bdd7ee",1,11,0,""],[43,17,1,1,"","#bdd7ee",1,12,0,""],[43,18,1,1,"","#bdd7ee",1,12,0,""],[43,22,1,1,"","",1,11,4,""],[44,1,1,1,"","",0,11,1,""],[44,12,1,1,"","",1,11,5,""],[44,17,1,1,"","#bdd7ee",1,12,0,""],[44,18,1,1,"","#bdd7ee",1,12,0,""],[44,22,1,1,"","",1,11,4,""],[45,1,1,1,"","",0,11,1,""],[45,4,1,1,"V4-1303","",1,11,0,"center"],[45,7,1,1,"V4-1301+1302","",1,11,0,"center"],[45,10,1,1,"V4-1301+1302","",1,11,0,"center"],[45,12,1,1,"","",1,11,5,""],[45,17,1,1,"","#bdd7ee",1,12,0,""],[45,18,1,1,"","#bdd7ee",1,12,0,""],[45,22,1,1,"","",1,11,4,""],[46,1,1,1,"","",0,11,1,""],[46,4,2,1,"TB01","#00B0F0",1,12,15,"center"],[46,5,1,1,"","#00B0F0",1,12,0,""],[46,6,1,1,"","#00B0F0",1,12,0,""],[46,7,2,1,"TB02","#00B0F0",1,12,15,"center"],[46,8,1,1,"","#00B0F0",1,12,0,""],[46,9,1,1,"","#00B0F0",1,12,0,""],[46,10,2,1,"TB03","#00B0F0",1,12,15,"center"],[46,12,1,1,"","",1,11,5,""],[46,16,1,1,"","#bdd7ee",1,12,0,""],[46,17,1,1,"","#bdd7ee",1,12,0,""],[46,18,1,1,"","#bdd7ee",1,12,0,""],[46,19,1,1,"","#bdd7ee",1,12,0,""],[46,22,1,1,"","",1,11,4,""],[47,1,1,1,"","",0,11,1,""],[47,5,1,1,"","#00B0F0",1,12,0,""],[47,6,1,1,"","#00B0F0",1,12,0,""],[47,8,1,1,"","#00B0F0",1,12,0,""],[47,9,1,1,"","#00B0F0",1,12,0,""],[47,12,1,1,"","",1,11,5,""],[47,16,1,1,"","#bdd7ee",1,12,0,""],[47,17,1,1,"","#bdd7ee",1,12,0,""],[47,18,1,1,"","#bdd7ee",1,12,0,""],[47,19,1,1,"","#bdd7ee",1,12,0,""],[47,22,1,1,"","",1,11,4,""],[48,1,1,1,"","",0,11,1,""],[48,2,1,1,"","",1,11,13,""],[48,12,1,1,"","",1,11,5,""],[48,16,1,1,"TMP","#bdd7ee",1,12,0,"center"],[48,17,1,1,"","#bdd7ee",1,12,0,""],[48,18,1,1,"","#bdd7ee",1,12,0,""],[48,19,1,1,"TMP","#bdd7ee",1,12,0,"center"],[48,22,1,1,"","",1,11,4,""],[49,1,1,1,"","",0,11,1,""],[49,2,1,1,"","",1,11,1,""],[49,4,1,1,"V4-1200","",1,11,0,"center"],[49,7,1,1,"V4-1200","",1,11,0,"center"],[49,10,1,1,"V4-1200","",1,11,0,"center"],[49,12,1,1,"","",1,11,5,""],[49,16,4,1,"龍\n門\nTA068","#bdd7ee",1,12,15,"center"],[49,17,1,1,"","#bdd7ee",1,12,0,""],[49,18,1,1,"","#bdd7ee",1,12,0,""],[49,19,4,1,"龍\n門\nTA066","#bdd7ee",1,12,15,"center"],[49,22,1,1,"","",1,11,4,""],[50,1,1,1,"","",0,11,1,""],[50,2,1,1,"","",1,11,1,""],[50,4,2,1,"TA054","#00B0F0",1,12,15,"center"],[50,5,1,1,"","#00B0F0",1,12,0,""],[50,6,1,1,"","#00B0F0",1,12,0,""],[50,7,2,1,"TA013","#00B0F0",1,12,15,"center"],[50,8,1,1,"","#00B0F0",1,12,0,""],[50,9,1,1,"","#00B0F0",1,12,0,""],[50,10,2,1,"TA014","#00B0F0",1,12,15,"center"],[50,12,1,1,"","",1,11,5,""],[50,17,1,1,"","#bdd7ee",1,12,0,""],[50,18,1,1,"","#bdd7ee",1,12,0,""],[50,22,1,1,"","",1,11,4,""],[51,1,1,1,"","",0,11,1,""],[51,2,1,1,"","",1,11,1,""],[51,5,1,1,"","#00B0F0",1,12,0,""],[51,6,1,1,"","#00B0F0",1,12,0,""],[51,8,1,1,"","#00B0F0",1,12,0,""],[51,9,1,1,"","#00B0F0",1,12,0,""],[51,12,1,1,"","",1,11,5,""],[51,17,1,1,"","#bdd7ee",1,12,0,""],[51,18,1,1,"","#bdd7ee",1,12,0,""],[51,22,1,1,"","",1,11,4,""],[52,1,1,1,"","",0,11,1,""],[52,2,1,1,"","",1,11,1,""],[52,12,1,1,"","",1,11,5,""],[52,17,1,1,"","#bdd7ee",1,12,0,""],[52,18,1,1,"","#bdd7ee",1,12,0,""],[52,22,1,1,"","",1,11,4,""],[53,1,1,1,"","",0,11,1,""],[53,2,2,1,"分\n電\n2","",1,8,15,"center"],[53,8,1,1,"ARM1207","",1,12,0,""],[53,12,1,1,"","",1,11,5,""],[53,22,1,1,"","",1,11,4,""],[54,1,1,1,"","",0,11,1,""],[54,8,2,1,"TA034","#FFFF00",1,12,15,"center"],[54,12,1,1,"","",1,11,5,""],[54,17,11,6,"OFFICE","",1,11,15,"center"],[55,1,1,1,"","",0,11,1,""],[55,2,1,1,"","",1,11,1,""],[55,12,1,1,"","",1,11,5,""],[56,1,1,1,"","",0,11,1,""],[56,2,1,1,"","",1,11,1,""],[56,12,1,1,"","",1,11,5,""],[57,1,1,1,"","",0,11,1,""],[57,2,1,1,"","",1,11,1,""],[57,12,1,1,"","",1,11,5,""],[58,1,1,1,"","",0,11,1,""],[58,2,1,1,"","",1,11,1,""],[58,12,1,1,"","",1,11,5,""],[59,1,1,1,"","",0,11,1,""],[59,2,1,1,"","",1,11,1,""],[59,12,1,1,"","",1,11,5,""],[60,1,1,1,"","",0,11,1,""],[60,2,1,1,"","",1,11,1,""],[60,12,1,1,"","",1,11,5,""],[61,1,1,1,"","",0,11,1,""],[61,2,1,1,"","",1,11,1,""],[61,12,1,1,"","",1,11,5,""],[62,1,1,1,"","",0,11,1,""],[62,2,1,1,"","",1,11,1,""],[62,12,1,1,"","",1,11,5,""],[63,1,1,1,"","",0,11,1,""],[63,2,1,1,"","",1,11,1,""],[63,12,1,1,"","",1,11,5,""],[64,1,1,1,"","",0,11,1,""],[64,2,1,1,"","",1,11,1,""],[64,12,1,1,"","",1,11,5,""],[65,1,1,1,"","",0,11,1,""],[65,2,1,1,"","",1,8,1,""],[65,12,1,1,"","",1,11,5,""],[65,17,4,6,"QC ROOM","",1,11,15,"center"],[66,1,1,1,"","",0,11,1,""],[66,2,1,1,"","",1,8,1,"center"],[66,12,1,1,"","",1,11,5,""],[67,1,1,1,"","",0,11,1,""],[67,2,2,1,"分\n電\n1","",1,8,15,"center"],[67,12,1,1,"","",1,11,5,""],[68,1,1,1,"","",0,11,1,""],[68,12,1,1,"","",1,11,5,""],[69,1,1,1,"","",0,11,1,""],[69,2,1,1,"","",1,8,1,"center"],[69,12,1,1,"","",1,11,5,""],[69,17,1,1,"","",1,11,1,"center"],[69,22,1,1,"","",1,11,4,"center"],[70,1,1,1,"","",0,11,1,""],[70,2,1,1,"","",1,11,1,""],[70,12,1,1,"","",1,11,5,""],[70,17,11,6,"QC ROOM","",1,11,15,"center"],[71,1,1,1,"","",0,11,1,""],[71,2,1,1,"","",1,11,1,""],[71,12,1,1,"","",1,11,5,""],[72,1,1,1,"","",0,11,1,""],[72,2,1,1,"","",1,11,1,""],[72,12,1,1,"","",1,11,5,""],[73,1,1,1,"","",0,11,1,""],[73,2,1,1,"","",1,11,1,""],[73,12,1,1,"","",1,11,5,""],[74,1,1,1,"","",0,11,1,""],[74,2,6,7,"刀模具室","",1,26,15,"center"],[74,12,1,1,"","",1,11,5,""],[75,1,1,1,"","",0,11,1,""],[75,12,1,1,"","",1,11,5,""],[76,1,1,1,"","",0,11,1,""],[76,12,1,1,"","",1,11,5,""],[77,1,1,1,"","",0,11,1,""],[77,12,1,1,"","",1,11,5,""],[78,1,1,1,"","",0,11,1,""],[78,12,1,1,"","",1,11,5,""],[79,1,1,1,"","",0,11,1,""],[79,12,1,1,"","",1,11,5,""],[80,1,1,1,"","",0,11,9,""],[80,2,1,1,"","",1,11,9,""],[80,3,1,1,"","",1,11,8,""],[80,4,1,1,"","",1,11,8,""],[80,5,1,2,"逃生門","",1,11,15,"center"],[80,7,1,1,"","",1,11,8,""],[80,8,1,1,"","",1,11,8,""],[80,9,1,1,"","",1,11,8,""],[80,10,1,1,"","",1,11,8,""],[80,11,1,1,"","",1,11,8,""],[80,12,1,1,"","",1,11,9,""],[80,13,1,4,"捲門","",1,11,15,"center"]]},"D廠產品":{"cols":[23,23,68,68,68,68,68,68,149,68,19,68,68,65,65,68,65,51,23,68,23,9,68,68,68,68,68,68,68],"rows":[40,40,40,40,20,20,20,21,21,21,21,21,22,21,21,21,21,21,21,22,21,22,21,21,22,22,22,21,21,22,21,22,20,22,23,22,23,22,23,22,22,22,21,22,21,22,21,22,21,21,21,22,20,21,20,21,20,21,20,21,20,21,20,21,20,21,20,22,40,20,21,21,20,21,22,21,21,21,21,22,20],"cells":[[1,1,2,21,"D廠產品","",1,26,15,"center"],[3,1,2,21,"泰國廠-D","",1,26,15,"center"],[5,1,1,1,"","",1,11,1,""],[5,4,1,1,"ARM1203","",1,11,0,"center"],[5,19,1,1,"","",1,11,1,""],[5,21,1,1,"","",1,11,4,""],[6,1,1,1,"","",1,11,1,""],[6,4,2,1,"TA025","#a9d18e",1,12,15,"center"],[6,8,2,1,"TA027","#ffffff",1,12,15,"center"],[6,19,1,1,"","",1,11,1,""],[6,21,1,1,"","",1,11,4,""],[7,1,1,1,"","",1,11,1,""],[7,19,1,1,"","",1,11,1,""],[7,21,1,1,"","",1,11,4,""],[8,1,1,1,"","",1,11,1,""],[8,19,6,1,"捲\n門","",1,11,15,"center"],[8,20,1,1,"","",1,11,5,""],[8,21,6,1,"鐵\n捲\n門","",1,11,15,"center"],[9,1,1,1,"","",1,11,1,""],[9,4,1,1,"08982100-555","",1,11,0,"center"],[9,8,1,1,"08991500-012","",1,11,0,"center"],[9,10,1,1,"01784900-082-1200","",1,11,0,"center"],[9,20,1,1,"","",1,11,5,""],[10,1,1,1,"","",1,11,1,""],[10,4,2,1,"TA024","#ffffff",1,12,15,"center"],[10,8,2,1,"TA026","#ffffff",1,12,15,"center"],[10,10,2,1,"TA016","#a9d18e",1,12,15,"center"],[10,20,1,1,"","",1,11,5,""],[11,1,1,1,"","",1,11,1,""],[11,20,1,1,"","",1,11,5,""],[12,1,1,1,"","",1,11,1,""],[12,20,1,1,"","",1,11,5,""],[13,1,1,1,"","",1,11,1,""],[13,4,1,1,"08991120-011-1201","",1,11,0,"center"],[13,8,1,1,"ARM1205","",1,11,0,"center"],[13,20,1,1,"","",1,11,13,""],[14,1,1,1,"","",1,11,1,""],[14,4,2,1,"TA031","#ffffff",1,12,15,"center"],[14,8,2,1,"TA032","#a9d18e",1,12,15,"center"],[14,13,1,1,"08983200-011 1202","",1,11,0,"center"],[14,18,1,3,"08983200-040殼蓋","",1,11,4,"center"],[14,21,2,1,"分\n電\n2","",1,8,15,"center"],[15,1,1,1,"","",1,11,1,""],[15,13,2,1,"TA040","#b4c7e7",1,12,15,"center"],[15,20,2,1,"TA007","#FFFF00",1,11,15,"center"],[16,1,1,1,"","",1,11,1,""],[16,21,1,1,"","",1,11,4,"center"],[17,1,1,1,"","",1,11,1,""],[17,13,1,1,"","#b4c7e7",1,11,0,"center"],[17,21,1,1,"","",1,11,4,"center"],[18,1,1,1,"","",1,11,1,""],[18,8,2,1,"TA047","#ffffff",1,12,15,"center"],[18,13,1,1,"08983200-011 1203","#b4c7e7",1,11,0,"center"],[18,20,1,1,"08981200-012","",1,12,0,"center"],[18,21,1,1,"","",1,11,4,"center"],[19,1,1,1,"","",1,8,1,""],[19,13,2,1,"TA039","#b4c7e7",1,12,15,"center"],[19,20,2,1,"TA006","#ffffff",1,12,15,"center"],[19,21,1,1,"","",1,11,4,"center"],[20,1,1,1,"","",1,8,1,""],[20,21,1,1,"","",1,11,4,"center"],[21,1,1,1,"","",1,11,1,""],[21,4,1,1,"ARM1206","",1,11,0,""],[21,13,1,1,"","#b4c7e7",1,12,0,"center"],[21,19,1,1,"","#ffffff",1,12,0,"center"],[21,21,1,1,"","",1,11,4,""],[22,1,1,1,"","",1,11,1,""],[22,4,2,1,"TA029","#e2f0d9",1,12,15,"center"],[22,13,1,1,"08983200-011 1201","#b4c7e7",1,12,0,"center"],[22,19,1,1,"","#ffffff",1,12,0,"center"],[22,20,1,1,"02146045-001 定位環","",1,12,0,"center"],[22,21,1,1,"","",1,11,4,""],[23,1,1,1,"","",1,11,1,""],[23,13,2,1,"TA015","#b4c7e7",1,12,15,"center"],[23,16,2,1,"TA012","#ffffff",1,12,15,"center"],[23,19,1,1,"","#ffffff",1,12,0,"center"],[23,20,2,1,"TA001","",1,12,15,"center"],[23,21,1,1,"","",1,11,4,""],[24,1,1,1,"","",1,11,1,""],[24,19,1,1,"","#ffffff",1,12,0,"center"],[24,21,1,1,"","",1,11,4,""],[25,1,1,1,"","",1,11,1,""],[25,21,1,1,"","",1,11,4,""],[26,1,1,1,"","",1,11,1,""],[26,4,2,1,"TA028","#ffffff",1,12,15,"center"],[26,13,1,1,"08991100-011 KA-BAND","",1,12,0,"center"],[26,16,1,1,"08983200-011 1204","",1,12,0,"center"],[26,20,1,1,"08983200-011 1203","",1,12,0,"center"],[26,21,1,1,"","",1,11,4,""],[27,1,1,1,"","",1,11,1,""],[27,13,2,1,"TA035","",1,12,15,"center"],[27,16,2,1,"TA038","",1,12,15,"center"],[27,20,2,1,"TA071","#FFFF00",1,12,15,"center"],[27,21,1,1,"","",1,11,4,""],[28,1,5,1,"逃生\n門","",1,11,15,"center"],[28,19,1,1,"","#ffffff",1,12,0,"center"],[28,21,1,1,"","",1,11,4,""],[29,16,1,1,"","#ffffff",1,12,0,"center"],[29,19,1,1,"","#ffffff",1,12,0,"center"],[29,20,1,1,"","#FFFF00",1,12,0,"center"],[29,21,2,1,"分\n電\n3","",1,8,15,"center"],[30,11,1,1,"","#ffffff",1,11,0,""],[30,16,1,1,"","#ffffff",1,12,0,"center"],[30,19,1,1,"","#ffffff",1,12,0,""],[30,20,1,1,"08983200-011 1202","#FFFF00",1,12,4,""],[31,13,2,1,"TA036","",1,12,15,"center"],[31,16,2,1,"TA005","#ffffff",1,12,15,"center"],[31,19,1,1,"","#ffffff",1,12,0,"center"],[31,20,2,1,"TA070","#FFFF00",1,12,15,"center"],[31,21,1,1,"","",1,11,4,""],[32,8,1,1,"ARM1204","",1,11,0,""],[32,21,1,1,"","",1,11,4,""],[33,1,1,1,"","",1,11,1,""],[33,8,2,1,"TA033","#e2f0d9",1,12,15,"center"],[33,20,1,1,"","#FFFF00",1,12,0,"center"],[33,21,1,1,"","",1,11,4,""],[34,1,1,1,"","",1,11,1,""],[34,13,1,1,"08981100-011 KA-BAND","",1,12,0,"center"],[34,20,1,1,"08983200-011 1201","#FFFF00",1,12,0,"center"],[34,21,1,1,"","",1,11,4,""],[35,1,2,1,"分\n電\n1","",1,8,15,"center"],[35,13,2,1,"TA037","",1,12,15,"center"],[35,16,2,1,"TA017","#ffffff",1,12,15,"center"],[35,19,1,1,"","#ffffff",1,12,0,"center"],[35,20,2,1,"TA069","#FFFF00",1,12,15,"center"],[35,21,1,1,"","",1,11,4,""],[36,8,1,1,"","#ffffff",1,11,0,""],[36,19,1,1,"","#ffffff",1,12,0,"center"],[36,21,1,1,"","",1,11,4,""],[37,1,1,1,"","",1,11,1,""],[37,8,2,1,"TA079","#ffffff",1,12,15,"center"],[37,16,1,1,"","#ffffff",1,12,0,"center"],[37,19,1,1,"","#ffffff",1,12,0,"center"],[37,21,1,1,"","",1,11,4,""],[38,1,1,1,"","",1,11,1,""],[38,4,1,1,"ARM1201+1202","#ffffff",1,11,0,""],[38,16,1,1,"08981120-011-1202","#ffffff",1,12,0,"center"],[38,19,1,1,"","#ffffff",1,12,0,"center"],[38,21,1,1,"","",1,11,4,""],[39,1,1,1,"","",1,11,1,""],[39,4,2,1,"TA030","#e2f0d9",1,12,15,"center"],[39,8,1,1,"","#ffffff",1,11,0,""],[39,13,2,1,"TA051","",1,12,15,"center"],[39,16,2,1,"TA002","",1,12,15,"center"],[39,20,2,1,"TA050","",1,12,15,"center"],[39,21,1,1,"","",1,11,4,""],[40,1,1,1,"","",1,11,1,""],[40,8,2,1,"TA089","#ffffff",1,12,15,"center"],[40,21,1,1,"","",1,11,4,""],[41,1,1,1,"","",1,11,1,""],[41,4,1,1,"","#ffffff",1,11,0,""],[41,5,1,1,"","#ffffff",1,11,0,""],[41,7,1,1,"","#ffffff",1,11,0,""],[41,21,1,1,"","",1,11,4,""],[42,1,1,1,"","",1,11,1,""],[42,4,1,1,"","#ffffff",1,11,0,""],[42,5,1,1,"","#ffffff",1,11,0,""],[42,7,1,1,"","#ffffff",1,11,0,""],[42,8,1,1,"","#ffffff",1,11,0,""],[42,16,1,1,"","#ffffff",1,12,0,"center"],[42,19,1,1,"","#ffffff",1,12,0,"center"],[42,21,1,1,"","",1,11,4,""],[43,1,1,1,"","",1,11,1,""],[43,3,2,1,"","",1,12,0,"center"],[43,4,2,1,"TA084","#ffffff",1,12,15,"center"],[43,5,1,1,"","#ffffff",1,12,0,""],[43,7,1,1,"","#ffffff",1,12,0,""],[43,8,2,1,"TA090","#ffffff",1,12,15,"center"],[43,13,2,1,"TA023","",1,12,15,"center"],[43,16,2,1,"TA003","#ffffff",1,12,15,"center"],[43,19,1,1,"","#ffffff",1,12,0,"center"],[43,20,2,1,"TA048","#ffffff",1,12,15,"center"],[43,21,1,1,"","",1,11,4,""],[44,1,1,1,"","",1,11,1,""],[44,19,1,1,"","#ffffff",1,12,0,"center"],[44,21,1,1,"","",1,11,4,""],[45,1,1,1,"","",1,11,1,""],[45,16,1,1,"","#ffffff",1,12,0,"center"],[45,19,1,1,"","#ffffff",1,12,0,"center"],[45,21,1,1,"","",1,11,4,""],[46,1,1,1,"","",1,11,1,""],[46,4,1,1,"","#ffffff",1,11,0,""],[46,7,1,1,"","#ffffff",1,12,0,""],[46,10,1,1,"","#ffffff",1,11,0,""],[46,16,1,1,"08991200-012","",1,12,0,"center"],[46,20,1,1,"02132260-036-1200","",1,12,0,"center"],[46,21,1,1,"","",1,11,4,""],[47,1,1,1,"","",1,8,1,""],[47,3,2,1,"","",1,12,0,"center"],[47,4,2,1,"TA083","#ffffff",1,12,15,"center"],[47,7,1,1,"","#ffffff",1,12,0,""],[47,8,2,1,"TA080","",1,12,15,"center"],[47,10,1,1,"","#ffffff",1,11,0,""],[47,13,2,1,"TA022","",1,12,15,"center"],[47,16,2,1,"TA004","#f8cbad",1,12,15,"center"],[47,20,2,1,"TA049","#ffd966",1,12,15,"center"],[47,21,1,1,"","",1,11,4,""],[48,1,1,1,"","",1,11,1,""],[48,21,1,1,"","",1,11,4,""],[49,1,1,1,"","",1,11,1,""],[49,16,1,1,"","#f8cbad",1,12,0,"center"],[49,19,1,1,"","#ffffff",1,12,0,"center"],[49,21,1,1,"","",1,11,4,""],[50,1,1,1,"","",1,11,1,""],[50,4,1,1,"","#ffffff",1,11,0,""],[50,6,1,1,"","#ffffff",1,12,0,""],[50,8,1,1,"","#ffffff",1,11,0,""],[50,10,1,1,"","#ffffff",1,11,0,""],[50,16,1,1,"08991300-011","#f8cbad",1,12,0,"center"],[50,19,1,1,"","#ffffff",1,12,0,"center"],[50,20,1,1,"02224077-052-1201","",1,12,0,"center"],[50,21,1,1,"","",1,11,4,""],[51,1,1,1,"","",1,48,1,""],[51,3,2,1,"","",1,12,0,"center"],[51,4,2,1,"TA082","#ffffff",1,12,15,"center"],[51,6,1,1,"","#ffffff",1,12,0,""],[51,8,2,1,"TA081","#ffffff",1,12,15,"center"],[51,10,1,1,"","#ffffff",1,11,0,""],[51,13,2,1,"TA053","#ffffff",1,12,15,"center"],[51,16,2,1,"TA009","#f8cbad",1,12,15,"center"],[51,19,1,1,"","#ffffff",1,12,0,"center"],[51,20,2,1,"TA021","",1,12,15,"center"],[51,21,1,1,"","",1,11,4,""],[52,1,1,1,"","",1,48,1,""],[52,19,1,1,"","#ffffff",1,12,0,"center"],[52,21,1,1,"","",1,11,4,""],[53,1,1,1,"","",1,48,1,""],[53,16,1,1,"","#f8cbad",1,12,0,"center"],[53,21,1,1,"","",1,11,4,""],[54,1,1,1,"","",1,48,1,""],[54,4,1,1,"","#ffffff",1,48,0,""],[54,6,1,1,"","#ffffff",1,48,0,""],[54,8,1,1,"","#ffffff",1,48,0,""],[54,16,1,1,"08981300-011","#f8cbad",1,12,0,"center"],[54,21,1,1,"","",1,11,4,""],[55,1,1,1,"","",1,48,3,""],[55,2,1,1,"","",1,48,2,""],[55,3,17,6,"QC-CMM","",1,48,14,"center"],[55,13,2,1,"TA052","",1,12,15,"center"],[55,16,2,1,"TA008","#f8cbad",1,12,15,"center"],[55,20,2,1,"TA057","",1,12,15,"center"],[55,21,1,1,"","",1,11,4,""],[56,1,1,1,"","",1,48,1,""],[56,21,1,1,"","",1,11,4,""],[57,1,1,1,"","",1,48,1,""],[57,21,1,1,"","",1,11,4,""],[58,1,1,1,"","",1,48,1,""],[58,13,1,1,"30","",1,12,0,"center"],[58,16,1,1,"065-1201","",1,12,0,"center"],[58,21,1,1,"","",1,11,4,""],[59,1,1,1,"","",1,48,1,""],[59,13,2,1,"TA046","",1,12,15,"center"],[59,16,2,1,"TA044","#00B0F0",1,12,15,"center"],[59,20,2,1,"TA042","",1,12,15,"center"],[59,21,1,1,"","",1,11,4,""],[60,1,1,1,"","",1,48,1,""],[60,21,1,1,"","",1,11,4,""],[61,1,1,1,"","",1,48,1,""],[61,21,2,1,"分\n電\n4","",1,8,15,"center"],[62,1,4,2,"380V\n主\n電\n1","",1,12,15,"center"],[62,13,1,1,"065-1202","",1,12,0,"center"],[62,20,1,1,"02561000-011","",1,12,0,"center"],[63,13,2,1,"TA045","",1,12,15,"center"],[63,16,2,1,"TA043","#ffffff",1,12,15,"center"],[63,20,2,1,"TA041","#ffffff",1,12,15,"center"],[63,21,1,1,"","",1,11,4,""],[64,21,1,1,"","",1,11,4,""],[65,21,1,1,"","",1,11,4,""],[66,1,1,1,"","",1,48,1,""],[66,13,1,1,"02132260-536-1301","",1,12,0,"center"],[66,20,1,1,"02132260-536-1303","",1,12,0,"center"],[66,21,1,1,"","",1,11,4,""],[67,1,1,1,"","",1,48,1,""],[67,13,2,1,"TB04","#ffd966",1,12,15,"center"],[67,16,2,1,"TB05","#ffffff",1,12,15,"center"],[67,20,2,1,"TB06","#ffd966",1,12,15,"center"],[67,21,1,1,"","",1,11,4,""],[68,1,1,1,"","",1,48,1,""],[68,21,1,1,"","",1,11,4,""],[69,1,1,1,"","",1,48,1,""],[69,13,1,1,"01784900-082-1303","",1,11,0,"center"],[69,20,1,1,"02132260-536-1302","",1,11,0,"center"],[69,21,1,1,"","",1,11,4,""],[70,1,1,1,"","",1,48,1,""],[70,13,2,1,"TB09","#ffd966",1,12,15,"center"],[70,16,2,1,"TB08","",1,12,15,"center"],[70,20,2,1,"TB07","#ffd966",1,12,15,"center"],[70,21,1,1,"","",1,11,4,""],[71,1,1,1,"","",1,48,9,""],[71,2,1,1,"","",1,48,8,""],[71,21,1,1,"","",1,11,4,""],[72,1,1,1,"","",1,11,1,""],[72,21,1,1,"","",1,11,4,""],[73,1,1,1,"","",1,12,1,""],[73,19,6,3,"ELECTRICITY\nROOM","",1,12,7,"center"],[74,1,1,1,"","",1,12,1,""],[75,1,6,2,"雜物室","",1,12,15,"center"],[75,3,4,3,"電梯","",1,12,15,"center"],[75,6,1,4,"捲門","",1,12,15,"center"],[75,10,3,6,"茶水室","",1,12,7,"center"],[75,16,1,1,"","",1,12,1,""],[76,6,4,4,"","",1,12,15,"center"],[76,16,1,1,"","",1,12,1,""],[77,16,1,1,"","",1,12,1,""],[78,10,1,1,"飲水機","",1,11,15,"center"],[78,11,1,5,"","",1,12,13,"center"],[78,16,1,1,"","",1,12,1,""],[79,3,2,3,"樓梯","",1,12,13,"center"],[79,10,2,5,"男廁","",1,12,15,"center"],[79,15,2,7,"女廁","",1,12,15,"center"],[80,6,1,4,"鐵捲門","",1,12,15,"center"]]}};
+let FAC={ov:{}},facSheet="A廠產品",facZ=1,fref=null,fu=null,prodMsg="";
+try{const r=JSON.parse(localStorage.getItem("toolfac")||"null");if(r&&r.ov)FAC=r}catch(e){}
+function saveFac(){touch();try{localStorage.setItem("toolfac",JSON.stringify(FAC))}catch(e){}if(fref)fref.set(FAC).catch(()=>{})}
+const isM=t=>/^T[AB]\d{2,3}$/i.test(String(t||"").trim());
+const FU=(()=>{const U=[];for(const[sh,S]of Object.entries(FACT)){const cov={};S.cells.forEach((c,i)=>{for(let r=c[0];r<c[0]+c[2];r++)for(let q=c[1];q<c[1]+c[3];q++)cov[r+","+q]=i});
+ S.cells.forEach((c,i)=>{if(isM(c[4])){const pi=cov[(c[0]-1)+","+c[1]],pc=pi!==undefined?S.cells[pi]:null;U.push({sh,key:cn(c[1]-1)+c[0],mi:i,pi:pc&&pc[4]&&!isM(pc[4])?pi:-1})}})}return U})();
+const shn=s=>s.replace(/產品$/,"");
+function facUnits(){return FU.map(u=>{const S=FACT[u.sh],o=FAC.ov[u.sh+"|"+u.key]||{},p0=u.pi>=0?S.cells[u.pi][4]:"",m0=S.cells[u.mi][4];return{...u,p0,m0,p:o.p!==undefined?o.p:p0,m:o.m!==undefined?o.m:m0}})}
+const facProducts=()=>[...new Set(FU.filter(u=>u.pi>=0).map(u=>FACT[u.sh].cells[u.pi][4]).filter(Boolean))];
+function machLine(p){const m=facUnits().filter(u=>u.p===p);return m.length?'<div class="s">機台：'+m.map(u=>esc(shn(u.sh)+" "+u.m)).join("、")+"</div>":""}
+function renderFac(){const S=FACT[facSheet],q=nz($("q").value),old=$("facv").querySelector(".fw"),sl=old?old.scrollLeft:0,st=old?old.scrollTop:0;
+ const U=facUnits().filter(u=>u.sh===facSheet),role={};U.forEach(u=>{role[u.mi]={u,k:"m"};if(u.pi>=0)role[u.pi]={u,k:"p"}});
+ let any=false,h='<div class="row" style="margin:0 0 8px">'+Object.keys(FACT).map(s=>`<button class="${s===facSheet?"p":""}" data-sh="${s}">${shn(s)}</button>`).join("")+'<span style="flex:1"></span><button data-z="-">－</button><button data-z="+">＋</button></div>';
+ const cells=S.cells.map((c,i)=>{const r=role[i];let t=c[4];if(r){t=r.k==="m"?r.u.m:r.u.p;if(r.k==="m"&&r.u.pi<0&&r.u.p)t+="\n"+r.u.p}
+  const hit=q&&nz(t).includes(q);if(hit)any=true;const b=c[8];
+  return `<div class="fc${r?" fu":""}${r&&r.k==="p"?" fp":""}${hit?" hit":""}" ${r?`data-u="${r.u.sh}|${r.u.key}" title="${canW?"點一下修改產品":""}"`:""} style="grid-area:${c[0]}/${c[1]}/span ${c[2]}/span ${c[3]};background:${c[5]||"#fff"};font-size:${Math.max(7,Math.round(c[7]*1.05))}px;font-weight:${c[6]?700:400};border-width:${b&2?1:0}px ${b&4?1:0}px ${b&8?1:0}px ${b&1?1:0}px">${esc(t)}</div>`}).join("");
+ $("facv").innerHTML=h+`<div class="fw"><div class="fg${q?" f":""}" style="zoom:${facZ};grid-template-columns:${S.cols.map(w=>w+"px").join(" ")};grid-template-rows:${S.rows.map(w=>w+"px").join(" ")}">${cells}</div></div>`+(q&&!any?'<div class="empty">這張圖裡找不到「'+esc($("q").value)+'」</div>':"");
+ const nw=$("facv").querySelector(".fw");if(nw){nw.scrollLeft=sl;nw.scrollTop=st;const hit=nw.querySelector(".hit");if(hit&&q)hit.scrollIntoView({block:"nearest",inline:"center"})}}
+function openFacU(uk,pSel,mVal){fu=facUnits().find(u=>u.sh+"|"+u.key===uk);if(!fu)return;const d=$("fdlg"),cur=pSel!==undefined?pSel:fu.p,list=[...PRODS];if(cur&&!list.includes(cur))list.push(cur);
+ d.innerHTML=`<b>${shn(fu.sh)} · 機台 ${esc(fu.m0)}</b><label>目前加工產品</label><select id="fd_p"><option value="">（空白）</option>${list.map(p=>`<option value="${esc(p)}"${p===cur?" selected":""}>${esc(p)}</option>`).join("")}</select>
+<div class="row"><input id="fd_np" placeholder="沒有想要的產品？在這裡新增" style="flex:1;min-width:0"><button id="fd_ap" type="button">＋ 新增產品</button></div>
+<label>機台編號</label><input id="fd_m" value="${esc(mVal!==undefined?mVal:fu.m)}">
+<div class="row"><button id="fd_r">還原成 Excel 原值</button><button id="fd_x" style="margin-left:auto">取消</button><button class="p" id="fd_s">儲存</button></div>`;if(!d.open)d.showModal()}
+$("fdlg").onclick=e=>{const id=e.target.id;if(id==="fd_x")return $("fdlg").close();if(!canW||!fu)return;const k=fu.sh+"|"+fu.key;
+ if(id==="fd_ap"){const n=$("fd_np").value.trim();if(!n)return;if(!PRODS.includes(n)){PRODS.push(n);saveProds()}openFacU(k,n,$("fd_m").value);return}
+ if(id==="fd_r"){delete FAC.ov[k];saveFac();$("fdlg").close();renderFac();return}
+ if(id==="fd_s"){const p=$("fd_p").value,m=$("fd_m").value.trim(),o={};if(p!==fu.p0)o.p=p;if(m&&m!==fu.m0)o.m=m;if(Object.keys(o).length)FAC.ov[k]=o;else delete FAC.ov[k];saveFac();$("fdlg").close();renderFac()}};
+$("facv").onclick=e=>{const t=e.target;if(t.dataset.sh){facSheet=t.dataset.sh;renderFac();return}
+ if(t.dataset.z){facZ=Math.min(2,Math.max(.4,facZ+(t.dataset.z==="+"?.15:-.15)));renderFac();return}
+ const c=t.closest(".fc");if(c&&c.dataset.u&&canW)openFacU(c.dataset.u)};
+$("v_f").onclick=()=>{view="f";focusK=null;render()};
 function openCats(){const d=$("kdlg"),cnt=c=>items.filter(i=>i.cat===c).length;
- d.innerHTML='<b>編輯分類</b><div class="s">可新增加工刀具的分類；還有刀具的分類不能刪除。</div>'+CATS.map((c,i)=>`<div class="r"><span>${c.replace(/</g,"&lt;")}（${cnt(c)} 筆）</span><button data-k="${i}">刪除</button></div>`).join("")+'<div class="row"><input id="k_n" placeholder="新分類名稱（例：鑽頭刀桿）"><button class="p" data-k="add">新增</button></div><div id="k_m" class="s" style="color:var(--warn)"></div><div class="row"><button data-k="x" style="margin-left:auto">關閉</button></div>';
+ d.innerHTML='<b>編輯分類</b><div class="s">可新增加工刀具的分類；還有刀具的分類不能刪除。</div>'+CATS.map((c,i)=>`<div class="r"><span>${c.replace(/</g,"&lt;")}（${cnt(c)} 筆）</span><button data-r="${i}">改名</button><button data-k="${i}">刪除</button></div>`).join("")+'<div class="row"><input id="k_n" placeholder="新分類名稱（例：鑽頭刀桿）"><button class="p" data-k="add">新增</button></div><div id="k_m" class="s" style="color:var(--warn)"></div><div class="row"><button data-k="x" style="margin-left:auto">關閉</button></div>';
  if(!d.open)d.showModal()}
-$("kdlg").onclick=e=>{const k=e.target.dataset.k;if(k===undefined||!canW)return;if(k==="x")return $("kdlg").close();
+$("kdlg").onclick=async e=>{const rr=e.target.dataset.r;
+ if(rr!==undefined){if(!canW)return;const old=CATS[+rr],n=await askText("新的分類名稱",old);if(!n||n===old)return;if(CATS.includes(n)){$("k_m").textContent="已經有這個分類";return}
+  CATS[+rr]=n;items.forEach(it=>{if(it.cat===old)it.cat=n});if(cat===old)cat=n;saveCats();save();render();openCats();return}
+ const k=e.target.dataset.k;if(k===undefined||!canW)return;if(k==="x")return $("kdlg").close();
  if(k==="add"){const n=$("k_n").value.trim();if(!n)return;if(CATS.includes(n)){$("k_m").textContent="已經有這個分類";return}CATS.push(n);saveCats();render();openCats();return}
  const c=CATS[+k];if(items.some(i=>i.cat===c)){$("k_m").textContent="「"+c+"」還有刀具，請先把刀具移到其他分類再刪除";return}
  if(CATS.length<=1){$("k_m").textContent="至少要保留一個分類";return}
