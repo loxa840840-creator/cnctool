@@ -38,10 +38,10 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 .ei{width:64px;padding:2px 6px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:32px 0}
 </style></head><body><main>
-<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.1.2</span></h1>
-<div id="who" class="row s" hidden style="margin:0 0 8px"><span id="who_t"></span><span id="syn"></span><button id="rf">↻ 重新整理</button><button id="adm" hidden>👥 帳號管理</button><button id="lo">登出</button></div>
+<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.2.0</span></h1>
+<div id="who" class="row s" hidden style="margin:0 0 8px"><span id="who_t"></span><span id="syn"></span><button id="rf">↻ 重新整理</button><button id="adm" hidden>👥 帳號管理</button><button id="pw">🔑 改密碼</button><button id="lo">登出</button></div>
 <div id="rob" class="s" hidden style="margin-bottom:8px">👁 唯讀模式：只有管理者可以修改</div>
-<div class="seg"><button id="v_l" class="on">清單</button><button id="v_m">位置圖</button></div>
+<div class="seg"><button id="v_l" class="on">刀桿清單</button><button id="v_m">車床位置圖</button><button id="v_n">銑床位置圖</button></div>
 <div id="dtool" class="row" hidden style="margin:0 0 6px"><button id="d_exp">⬇ 匯出資料</button><button id="d_imp">⬆ 匯入資料</button><button id="d_htm">⬇ 匯出 HTML（含完整資料）</button><button id="d_emb" hidden>↺ 載入 HTML 內嵌資料</button><button id="d_pub" hidden>📌 把目前資料存進頁面</button><button id="d_bk" hidden>↩ 還原載入前的本機資料</button><button id="d_ok" class="p" hidden>確定匯入（取代目前資料）</button><input id="d_file" type="file" accept=".json,application/json" hidden></div>
 <div id="dmsg" class="s" style="margin-bottom:8px"></div>
 <div class="bar"><input id="q" type="search" placeholder="搜尋型號、品牌、位置…"><button class="p" id="add">＋ 新增</button></div>
@@ -68,12 +68,13 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 <dialog id="hdlg"></dialog>
 <dialog id="cdlg"><b id="ct_">位置</b><div class="s">一行一支刀桿</div><textarea id="c_t" rows="6" style="width:100%;margin-top:6px"></textarea><div class="row"><button id="c_x" style="margin-left:auto">關閉</button><button class="p" id="c_s">儲存</button></div></dialog>
 <dialog id="zdlg"><img id="zimg" alt="" style="width:100%;border-radius:8px"><div class="row"><button id="zc" style="margin-left:auto">關閉</button></div></dialog>
-<div id="auth" hidden style="position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px"><div style="width:100%;max-width:340px"><h2 style="margin:0 0 12px">🔧 刀具管理 登入</h2><input id="a_e" type="email" placeholder="Email" autocomplete="username"><input id="a_p" type="password" placeholder="密碼（至少 6 碼）" autocomplete="current-password" style="margin-top:8px"><div class="row"><button class="p" id="a_in">登入</button><button id="a_up">註冊新帳號</button><button id="a_out">登出</button></div><div id="a_m" class="s" style="margin-top:10px"></div></div></div>
+<div id="auth" hidden style="position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px"><div style="width:100%;max-width:340px"><h2 style="margin:0 0 12px">🔧 刀具管理 登入</h2><input id="a_e" type="email" placeholder="Email" autocomplete="username"><input id="a_p" type="password" placeholder="密碼（至少 6 碼）" autocomplete="current-password" style="margin-top:8px"><label class="s" style="display:block;margin-top:6px"><input id="a_sp" type="checkbox" style="width:auto"> 顯示密碼</label><div class="row"><button class="p" id="a_in">登入</button><button id="a_up">註冊新帳號</button><button id="a_out">登出</button></div><div id="a_m" class="s" style="margin-top:10px"></div></div></div>
 <dialog id="udlg"></dialog>
+<dialog id="kdlg"></dialog>
 </main>
 <script id="embedded-data" type="application/json">null</script>
 <script id="app-js">
-const APP_VERSION="1.1.2";
+const APP_VERSION="1.2.0";
 const SB_URL="https://ycoyzffgqlxzhhpnctoq.supabase.co",SB_KEY="sb_publishable_1xyIZq2vpBUOLfd2jps1oQ_A5tHFAZg";
 const CLOUD=!window.claude&&!!SB_URL;let SBON=false,canQ=false,SES=null,lastT=new Map();
 const MAIN_HTML=document.querySelector("main").outerHTML;
@@ -84,7 +85,10 @@ try{if(EMB){const ap=localStorage.getItem("toolemb"),ts=+localStorage.getItem("t
  if(!has||(ap!==String(EMB.t)&&EMB.t>ts)){SEED0=EMB;
   if(has){const bk={};["tools","toollogs","toolcells","toolgrid","toolhist","toolpics","toolsts"].forEach(k=>{const v=localStorage.getItem(k);if(v!==null)bk[k]=v});
    try{localStorage.setItem("toolbackup",JSON.stringify(bk));BACKED=true}catch(e){}}}}}catch(e){if(EMB)SEED0=EMB}
-const CATS=["車刀刀片","車刀刀桿","銑刀","銑刀刀桿"];
+let CATS=["車刀刀片","車刀刀桿","銑刀","銑刀刀桿"],cref=null;
+try{const r=JSON.parse(localStorage.getItem("toolcats")||"null");if(Array.isArray(r)&&r.length)CATS=r}catch(e){}
+function fillCat(){$("f_cat").innerHTML=CATS.map(c=>`<option>${c}</option>`).join("")}
+function saveCats(){touch();try{localStorage.setItem("toolcats",JSON.stringify(CATS))}catch(e){}fillCat();if(cref)cref.set({c:CATS}).catch(()=>{})}
 let items=null,cat="全部",editId=null,pend=null,pq={},okId=null,ps={},okS=null;
 try{items=JSON.parse(localStorage.getItem("tools")||"null")}catch(e){}
 if(SEED0&&Array.isArray(SEED0.items))items=JSON.parse(JSON.stringify(SEED0.items));
@@ -111,18 +115,21 @@ function save(){touch();try{localStorage.setItem("tools",JSON.stringify(items))}
  try{const pq=await db.collection("photos").get();pq.docs.forEach(d=>{const v=d.data().d;if(typeof v==="string")pics[d.id]=v});render()}catch(e){}
  try{const lr=db.doc("layout/main"),ls=await lr.get();if(ls.exists&&ls.data().c){const d0=ls.data();cells=JSON.parse(JSON.stringify(d0.c));if(d0.nc&&d0.nr)setGrid(d0.nc,d0.nr);render()}else if(await whoP){await lr.set({c:cells,nc:NC,nr:NR})}lref=lr}catch(e){}
  try{const hr=db.doc("layout/hist"),hs=await hr.get();if(hs.exists&&Array.isArray(hs.data().h))hist=clone(hs.data().h);hrf=hr}catch(e){}
+ try{const mr=db.doc("layout/mill"),ms=await mr.get();MP.m.lref=mr;if(ms.exists&&ms.data().c){const d=ms.data();MP.m.cells=clone(d.c);MP.m.nc=d.nc||9;MP.m.nr=d.nr||8}else if(await whoP){await mr.set({c:MP.m.cells,nc:MP.m.nc,nr:MP.m.nr})}}catch(e){}
+ try{const mh=db.doc("layout/histm"),s2=await mh.get();MP.m.hrf=mh;if(s2.exists&&Array.isArray(s2.data().h))MP.m.hist=clone(s2.data().h)}catch(e){}
+ try{const cr=db.doc("layout/cats"),c2=await cr.get();cref=cr;if(c2.exists&&Array.isArray(c2.data().c)&&c2.data().c.length){CATS=clone(c2.data().c);fillCat();render()}}catch(e){}
 }catch(e){}})();
-$("f_cat").innerHTML=CATS.map(c=>`<option>${c}</option>`).join("");
+fillCat();
 function render(){
  $("list").className=canW?"":canQ?"qo":"ro";$("rob").hidden=canW;$("dtool").hidden=!canW;
- $("v_l").className=view==="l"?"on":"";$("v_m").className=view==="m"?"on":"";
+ $("v_l").className=view==="l"?"on":"";$("v_m").className=view==="m"?"on":"";$("v_n").className=view==="n"?"on":"";
  const L=view==="l";$("tabs").hidden=!L;$("list").hidden=!L;$("add").hidden=!L||!canW;$("map").hidden=L;$("mtool").hidden=L||!canW;
  if(!L){renderMap();return}
- $("tabs").innerHTML=["全部",...CATS].map(c=>`<button class="${c===cat?"on":""}" data-c="${c}">${c}</button>`).join("");
+ $("tabs").innerHTML=["全部",...CATS].map(c=>`<button class="${c===cat?"on":""}" data-c="${c}">${c}</button>`).join("")+(canW?'<button data-c="__edit">⚙ 編輯分類</button>':"");
  const k=$("q").value.trim().toLowerCase();
  const rs=items.filter(i=>(cat==="全部"||i.cat===cat)&&(!k||[i.model,i.brand,i.spec,i.note,locs(i).join(" ")].join(" ").toLowerCase().includes(k)));
  $("list").innerHTML=rs.length?rs.map(i=>{const dq=pq[i.id]!==undefined,q=dq?pq[i.id]:i.qty,low=q<=i.min,high=i.max>0&&q>i.max,st=stats(i);return `<div class="card"><div class="top"><div style="display:flex;gap:10px;min-width:0">${imgSrc(i)?`<img class="th" alt="" src="${imgSrc(i)}" data-a="zoom" data-i="${i.id}">`:""}<div><div class="m">${esc(i.model)}</div><div class="s">${esc([i.brand,i.spec].filter(Boolean).join(" · "))}</div></div></div><span class="tag">${i.cat}</span></div>
- <div class="s">${i.note?esc(i.note)+" ":""}${locs(i).map(k=>`<button class="tag" data-a="goto" data-k="${k}" style="cursor:pointer">在 ${k} 格</button>`).join(" ")}</div>
+ <div class="s">${i.note?esc(i.note)+" ":""}${locs(i).map(k=>`<button class="tag" data-a="goto" data-k="${k}" style="cursor:pointer">${k.startsWith("銑:")?"銑床 "+k.slice(2):"車床 "+k}</button>`).join(" ")}</div>
  ${(st||i.ov)?statLine(i,st):""}
  <div class="row"><div class="q"><button data-a="dec" data-i="${i.id}">−</button><b class="${low?"low":high?"high":""}">${q}</b><button data-a="inc" data-i="${i.id}">＋</button>${dq?`<span class="tag" style="color:#d97706;border-color:#d97706">未儲存（原 ${i.qty}）</span>`:""}${okId===i.id?'<span class="tag" style="color:#16a34a;border-color:#16a34a">✓ 已儲存</span>':""}${low?'<span class="tag low">庫存偏低</span>':""}${high?'<span class="tag high">庫存偏高</span>':""}</div>
  ${dq?`<button class="p" data-a="sv" data-i="${i.id}">儲存</button><button data-a="rv" data-i="${i.id}">取消</button>`:""}<button data-a="log" data-i="${i.id}">紀錄</button><button data-a="edit" data-i="${i.id}">編輯</button><button data-a="del" data-i="${i.id}" ${pend===i.id?'class="p" style="background:var(--warn);border-color:var(--warn)"':""}>${pend===i.id?"再按一次確定刪除":"刪除"}</button></div></div>`}).join(""):'<div class="empty">沒有符合的刀具</div>';
@@ -152,12 +159,12 @@ $("save").onclick=async()=>{
 };
 window.addEventListener("beforeunload",e=>{if(Object.keys(pq).length||Object.keys(ps).length){e.preventDefault();e.returnValue=""}});
 $("q").oninput=()=>{focusK=null;render()};
-$("tabs").onclick=e=>{const c=e.target.dataset.c;if(c){cat=c;render()}};
+$("tabs").onclick=e=>{const c=e.target.dataset.c;if(c==="__edit"){if(canW)openCats();return}if(c){cat=c;render()}};
 $("list").onchange=e=>{const f=e.target.dataset.f;if(!f||!canW)return;const it=items.find(i=>i.id===+e.target.dataset.i);if(!it)return;
  const n=Math.max(0,+e.target.value||0);ps[it.id]=ps[it.id]||{};ps[it.id][f]=Math.round(n);render()};
 $("list").onclick=e=>{
  const a=e.target.dataset.a,id=+e.target.dataset.i;if(!a)return;
- if(a==="goto"){view="m";focusK=e.target.dataset.k;$("q").value="";render();return}
+ if(a==="goto"){const gk=e.target.dataset.k;if(gk.startsWith("銑:")){swapMap("m");view="n";focusK=gk.slice(2)}else{swapMap("l");view="m";focusK=gk}$("q").value="";render();return}
  if(!canW&&a!=="stat"&&a!=="zoom"&&a!=="log"&&!(canQ&&(a==="inc"||a==="dec"||a==="sv"||a==="rv")))return;
  if(a!=="del"&&pend!==null){pend=null}
  const it=items.find(i=>i.id===id);
@@ -249,7 +256,7 @@ function persistPics(){if(dbh)return;try{localStorage.setItem("toolpics",JSON.st
 let impData=null;
 $("d_exp").onclick=async()=>{
  const used={};items.forEach(i=>{if(pics[i.id])used[i.id]=pics[i.id]});
- const data=JSON.stringify({app:"tool-manager",v:1,t:Date.now(),items,logs,cells,nc:NC,nr:NR,pics:used,hist});
+ const L0=getMap("l"),M0=getMap("m");const data=JSON.stringify({app:"tool-manager",v:2,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cats:CATS});
  const fn="刀具管理備份_"+new Date().toISOString().slice(0,10)+".json";$("dmsg").textContent="";
  try{const dl=window.claude?await claude.use("downloads"):null;
   if(dl){await dl.save({filename:fn,data});$("dmsg").textContent="✓ 已匯出 "+items.length+" 筆刀具";return}
@@ -258,7 +265,7 @@ $("d_exp").onclick=async()=>{
 };
 function buildHtml(){
  const used={};items.forEach(i=>{if(pics[i.id])used[i.id]=pics[i.id]});
- const payload={app:"tool-manager",version:APP_VERSION,t:Date.now(),items,logs,cells,nc:NC,nr:NR,pics:used,hist};
+ const L0=getMap("l"),M0=getMap("m");const payload={app:"tool-manager",version:APP_VERSION,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cats:CATS};
  const j=JSON.stringify(payload).replace(/</g,"\\u003c").replace(/\u2028/g,"\\u2028").replace(/\u2029/g,"\\u2029");
  const css=document.getElementById("app-style").textContent,js=document.getElementById("app-js").textContent;
  const html='<!doctype html>\n<html lang="zh-Hant"><head><meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<title>刀具管理</title>\n<style id="app-style">'+css+'</style></head><body>'+MAIN_HTML+'\n<script id="embedded-data" type="application/json">'+j+'<\/script>\n<script id="app-js">'+js+'<\/script>\n</body></html>';
@@ -281,11 +288,13 @@ $("d_file").onchange=async()=>{const f=$("d_file").files[0];$("d_file").value=""
  if(!d||d.app!=="tool-manager"||!Array.isArray(d.items)){$("dmsg").textContent="這不是本程式的備份檔";return}
  impData=d;$("d_ok").hidden=false;$("dmsg").textContent="備份內含 "+d.items.length+" 筆刀具。按「確定匯入」會取代目前所有資料。"};
 $("d_ok").onclick=async()=>{const d=impData;if(!d||!canW)return;impData=null;$("d_ok").hidden=true;
- const oldPics=Object.keys(pics),oldLogs=Object.keys(logs);
+ swapMap("l");if(view==="n")view="m";const oldPics=Object.keys(pics),oldLogs=Object.keys(logs);
  items=d.items;logs=d.logs&&typeof d.logs==="object"?d.logs:{};if(d.cells&&typeof d.cells==="object")cells=d.cells;if(d.nc&&d.nr)setGrid(d.nc,d.nr);
  pics=d.pics&&typeof d.pics==="object"?d.pics:{};if(Array.isArray(d.hist))hist=d.hist;
  pend=null;pq={};ps={};
  save();saveCells();saveHist();Object.keys(logs).forEach(saveLog);
+ if(d.mill&&d.mill.cells){MP.m.cells=d.mill.cells;MP.m.nc=d.mill.nc||9;MP.m.nr=d.mill.nr||8;MP.m.hist=d.mill.hist||[];swapMap("m");saveCells();saveHist();swapMap("l")}
+ if(Array.isArray(d.cats)&&d.cats.length){CATS=d.cats;saveCats()}
  if(dbh){oldLogs.filter(k=>!(k in logs)).forEach(k=>dbh.doc("logs/"+k).delete().catch(()=>{}));
   for(const k of Object.keys(pics))try{await dbh.doc("photos/"+k).set({d:pics[k]})}catch(e){}
   oldPics.filter(k=>!(k in pics)).forEach(k=>dbh.doc("photos/"+k).delete().catch(()=>{}))}
@@ -302,7 +311,10 @@ const cn=i=>(i>=26?String.fromCharCode(64+Math.floor(i/26)):"")+String.fromCharC
 let NC=9,NR=8,COLS=[];
 const setGrid=(c,r)=>{NC=Math.max(1,Math.min(52,+c||9));NR=Math.max(1,Math.min(60,+r||8));COLS=Array.from({length:NC},(_,i)=>cn(i))};
 setGrid(9,8);
-let view="l",focusK=null,cells=null,ck=null,lref=null,cto=null;
+let view="l",focusK=null,cells=null,ck=null,lref=null,cto=null,curMap="l";
+const TM={},MP={m:{cells:{},nc:9,nr:8,hist:[],lref:null,hrf:null}};
+const getMap=k=>curMap===k?{cells,nc:NC,nr:NR,hist}:MP[k];
+function swapMap(to){if(to===curMap)return;MP[curMap]={cells,nc:NC,nr:NR,hist,lref,hrf};const t=MP[to];cells=t.cells;setGrid(t.nc,t.nr);hist=t.hist;lref=t.lref;hrf=t.hrf;curMap=to}
 const SEED=[
 ["PCHPR S25-34","S16Q-SDUCR11","GEHR2525M02-10L","SVQCR-2525M16","SVKCR-2525M11|KGMR-2525M-3T10L","15.5EDX-4D-25|KGBSR2525M22NS(HG)","EGEHR-25B-3D-20|C10M-SDUCR07-13","",""],
 ["ETFNL-2525M16|ETQNR-2525M16","ETJNL2525M16|ETJNR2525M16","EDGTR-25B-2D-14","SVUCR-2525M16|EDJNR-2525M15","H08K-STUPR09-10|H08K-SCLCR06-09","SS16-DRA140M-8|TID130F16-5","S25R-ETUNL16","C04G-SCLCR03-05|C06J-SCLCR04-07|C06J-TUBR06-07","EVJNR-2020K16"],
@@ -317,9 +329,10 @@ if(SEED0&&SEED0.cells&&typeof SEED0.cells==="object"){cells=JSON.parse(JSON.stri
 if(!cells){cells={};SEED.forEach((row,ri)=>row.forEach((v,ci)=>{if(v)cells[COLS[ci]+(ri+1)]=v.split("|").join("\n")}))}
 const nz=v=>String(v||"").toUpperCase().replace(/[\s\-_]/g,"");
 const lines=k=>(cells[k]||"").split("\n").map(x=>x.trim()).filter(Boolean);
-function locs(it){const n=nz(it.model),o=[];if(!n)return o;for(const c of COLS)for(let r=1;r<=NR;r++){const k=c+r;if(lines(k).some(x=>nz(x)===n))o.push(k)}return o}
-function saveCells(){touch();try{localStorage.setItem("toolcells",JSON.stringify(cells));localStorage.setItem("toolgrid",JSON.stringify({nc:NC,nr:NR}))}catch(e){}
- if(lref){clearTimeout(cto);cto=setTimeout(()=>lref.set({c:cells,nc:NC,nr:NR}).catch(()=>{}),400)}}
+function locs(it){const n=nz(it.model),o=[];if(!n)return o;
+ for(const [m,pre] of [["l",""],["m","銑:"]]){const g=getMap(m);for(let c=0;c<g.nc;c++)for(let r=1;r<=g.nr;r++){const k=cn(c)+r;if((g.cells[k]||"").split("\n").some(x=>nz(x)===n))o.push(pre+k)}}return o}
+function saveCells(){touch();const sf=curMap==="m"?"_m":"";try{localStorage.setItem("toolcells"+sf,JSON.stringify(cells));localStorage.setItem("toolgrid"+sf,JSON.stringify({nc:NC,nr:NR}))}catch(e){}
+ if(lref){const c0=cells,n0=NC,r0=NR,l0=lref,k="c"+curMap;clearTimeout(TM[k]);TM[k]=setTimeout(()=>l0.set({c:c0,nc:n0,nr:r0}).catch(()=>{}),400)}}
 function renderMap(){
  const q=nz($("q").value);let h='<div class="mg'+(q||focusK?" f":"")+'" style="grid-template-columns:24px repeat('+NC+',minmax(104px,1fr));min-width:'+(24+NC*108)+'px"><div></div>'+COLS.map(c=>`<div class="mh">${c}</div>`).join("");
  for(let r=1;r<=NR;r++){h+=`<div class="rl">${r}</div>`;for(const c of COLS){const k=c+r,ls=lines(k),hit=q?ls.some(x=>nz(x).includes(q)):k===focusK;h+=`<div class="c${hit?" hit":""}" data-k="${k}">${ls.map(x=>`<div>${esc(x)}</div>`).join("")}</div>`}}
@@ -327,7 +340,8 @@ function renderMap(){
  const el=$("map").querySelector(".hit");if(el)el.scrollIntoView({block:"nearest",inline:"center"})
 }
 $("v_l").onclick=()=>{view="l";render()};
-$("v_m").onclick=()=>{view="m";focusK=null;render()};
+$("v_m").onclick=()=>{swapMap("l");view="m";focusK=null;render()};
+$("v_n").onclick=()=>{swapMap("m");view="n";focusK=null;render()};
 $("map").onclick=e=>{const c=e.target.closest(".c");if(!c)return;ck=c.dataset.k;$("ct_").textContent=ck+" 格";$("c_t").value=lines(ck).join("\n");$("c_t").readOnly=!canW;$("c_s").hidden=!canW;$("cdlg").showModal()};
 $("mtool").onclick=e=>{const g=e.target.dataset.g;if(!g||!canW)return;let msg="";
  if(g==="undo"){if(!hist.length){$("mmsg").textContent="沒有可以復原的步驟";return}const h=hist.pop();saveHist();applySnap(h);$("mmsg").textContent="已復原："+h.n;return}
@@ -342,9 +356,11 @@ $("mtool").onclick=e=>{const g=e.target.dataset.g;if(!g||!canW)return;let msg=""
 let hist=[],hrf=null,hto=null;
 try{const r=localStorage.getItem("toolhist");if(SEED0&&Array.isArray(SEED0.hist))hist=JSON.parse(JSON.stringify(SEED0.hist));else if(r!==null)hist=JSON.parse(r)||[]}catch(e){}
 const clone=o=>JSON.parse(JSON.stringify(o));
+try{const c=localStorage.getItem("toolcells_m"),g=JSON.parse(localStorage.getItem("toolgrid_m")||"null"),h=localStorage.getItem("toolhist_m");if(c)MP.m.cells=JSON.parse(c)||{};if(g){MP.m.nc=g.nc;MP.m.nr=g.nr}if(h)MP.m.hist=JSON.parse(h)||[]}catch(e){}
+if(SEED0&&SEED0.mill&&SEED0.mill.cells)MP.m={cells:clone(SEED0.mill.cells),nc:SEED0.mill.nc||9,nr:SEED0.mill.nr||8,hist:clone(SEED0.mill.hist||[]),lref:null,hrf:null};
 function saveHist(){while(hist.length>20||(hist.length>1&&JSON.stringify(hist).length>200000))hist.shift();
- touch();try{localStorage.setItem("toolhist",JSON.stringify(hist))}catch(e){}
- if(hrf){clearTimeout(hto);hto=setTimeout(()=>hrf.set({h:hist}).catch(()=>{}),500)}}
+ touch();try{localStorage.setItem("toolhist"+(curMap==="m"?"_m":""),JSON.stringify(hist))}catch(e){}
+ if(hrf){const h0=hist,r0=hrf,k="h"+curMap;clearTimeout(TM[k]);TM[k]=setTimeout(()=>r0.set({h:h0}).catch(()=>{}),500)}}
 function snap(n){hist.push({t:Date.now(),c:clone(cells),nc:NC,nr:NR,n});saveHist()}
 function applySnap(h){cells=clone(h.c);setGrid(h.nc,h.nr);saveCells();render()}
 function openHist(){const d=$("hdlg");
@@ -377,7 +393,7 @@ async function tok(){if(!SES)throw new Error("未登入");if(Date.now()>SES.exp)
 async function api(path,o){o=o||{};const r=await fetch(SB_URL+"/rest/v1/"+path,{method:o.method||"GET",headers:Object.assign(H0(),{Authorization:"Bearer "+await tok()},o.prefer?{Prefer:o.prefer}:{}),body:o.body===undefined?undefined:JSON.stringify(o.body)});const t=await r.text();if(!r.ok)throw new Error(r.status+" "+t.slice(0,120));return t?JSON.parse(t):null}
 const setSyn=(t,bad)=>{$("syn").textContent=t;$("syn").style.color=bad?"var(--warn)":"var(--mut)"};
 function showLogin(m){$("auth").hidden=false;$("a_m").textContent=(m||"")+"（程式版本 "+APP_VERSION+"）"}
-function cacheLocal(){try{localStorage.setItem("tools",JSON.stringify(items));localStorage.setItem("toollogs",JSON.stringify(logs));localStorage.setItem("toolcells",JSON.stringify(cells));localStorage.setItem("toolgrid",JSON.stringify({nc:NC,nr:NR}));localStorage.setItem("toolhist",JSON.stringify(hist));localStorage.setItem("toolsts",String(Date.now()))}catch(e){}}
+function cacheLocal(){try{localStorage.setItem("tools",JSON.stringify(items));localStorage.setItem("toollogs",JSON.stringify(logs));const Lm=getMap("l"),Mm=getMap("m");localStorage.setItem("toolcells",JSON.stringify(Lm.cells));localStorage.setItem("toolgrid",JSON.stringify({nc:Lm.nc,nr:Lm.nr}));localStorage.setItem("toolhist",JSON.stringify(Lm.hist));localStorage.setItem("toolcells_m",JSON.stringify(Mm.cells));localStorage.setItem("toolgrid_m",JSON.stringify({nc:Mm.nc,nr:Mm.nr}));localStorage.setItem("toolhist_m",JSON.stringify(Mm.hist));localStorage.setItem("toolcats",JSON.stringify(CATS));localStorage.setItem("toolsts",String(Date.now()))}catch(e){}}
 const UPS="resolution=merge-duplicates,return=minimal";
 async function syncTools(list){
  if(canQ&&!canW){for(const it of list){const old=lastT.get(it.id);if(!old)continue;const d=(+it.qty||0)-(+JSON.parse(old).qty||0);if(!d)continue;
@@ -392,7 +408,7 @@ async function cput(a,b,v){
  if(a==="inventory")return syncTools(v.items);
  if(!canW||a==="photos")return;const now=new Date().toISOString();
  if(a==="logs")return api("tool_logs?on_conflict=tool_id",{method:"POST",prefer:UPS,body:{tool_id:+b,data:v.l||[],updated_at:now}});
- if(a==="layout")return api("app_settings?on_conflict=key",{method:"POST",prefer:UPS,body:{key:b==="hist"?"hist":"layout",value:v,updated_at:now}})}
+ if(a==="layout")return api("app_settings?on_conflict=key",{method:"POST",prefer:UPS,body:{key:{main:"layout",hist:"hist",mill:"layout_m",histm:"hist_m",cats:"cats"}[b],value:v,updated_at:now}})}
 const cdb={doc(path){const[a,b]=path.split("/");return{
  async set(v){if(a==="photos"){if(canW)await api("tool_photos?on_conflict=tool_id",{method:"POST",prefer:UPS,body:{tool_id:+b,data:v.d,updated_at:new Date().toISOString()}});return}if(a==="logs"&&!canW)return;try{await cput(a,b,v);setSyn("☁ 已同步 "+new Date().toLocaleTimeString("zh-TW",{hour12:false}))}catch(e){setSyn("⚠ 雲端儲存失敗："+e.message,1)}},
  async delete(){if(!canW)return;if(a==="logs")try{await api("tool_logs?tool_id=eq."+b,{method:"DELETE"})}catch(e){}if(a==="photos")try{await api("tool_photos?tool_id=eq."+b,{method:"DELETE"})}catch(e){}}}}};
@@ -408,8 +424,12 @@ async function cloudLoad(){
   $("dmsg").textContent=canW?"雲端目前是空的。請按「⬆ 匯入資料」選擇備份檔（.json），資料會存到雲端。":"雲端目前沒有資料，請管理員先匯入。";return}
  items=tl.map(r=>r.data);lastT=new Map(items.map(i=>[i.id,cs(i)]));logs={};lg.forEach(r=>{logs[r.tool_id]=r.data});
  const S={};st.forEach(r=>{S[r.key]=r.value});
+ const keep=curMap;swapMap("l");
  if(S.layout&&S.layout.c){cells=S.layout.c;if(S.layout.nc&&S.layout.nr)setGrid(S.layout.nc,S.layout.nr)}
  if(S.hist&&Array.isArray(S.hist.h))hist=S.hist.h;
+ swapMap("m");const LM=S.layout_m||{};cells=LM.c||{};setGrid(LM.nc||9,LM.nr||8);hist=S.hist_m&&Array.isArray(S.hist_m.h)?S.hist_m.h:[];
+ swapMap(keep);
+ if(S.cats&&Array.isArray(S.cats.c)&&S.cats.c.length){CATS=S.cats.c;fillCat()}
  cacheLocal();render();try{renderMap()}catch(e){}setSyn("☁ 已載入 "+new Date().toLocaleTimeString("zh-TW",{hour12:false}));loadPhotos()}
 async function cloudStart(){
  try{const p=await api("profiles?select=role&id=eq."+SES.uid),role=p&&p[0]?p[0].role:"pending";
@@ -417,7 +437,7 @@ async function cloudStart(){
   canW=role==="admin";canQ=role==="user";SBON=true;$("auth").hidden=true;
   $("who").hidden=false;$("who_t").textContent=SES.email+" · "+(canW?"管理員":"使用者");$("adm").hidden=!canW;
   $("rob").textContent=canW?"":"👁 一般使用者：只能加減刀具數量（按 ＋／－ 後請按儲存）";
-  dbh=cdb;ref=cdb.doc("inventory/main");lref=cdb.doc("layout/main");hrf=cdb.doc("layout/hist");
+  dbh=cdb;ref=cdb.doc("inventory/main");lref=cdb.doc("layout/main");hrf=cdb.doc("layout/hist");MP.m.lref=cdb.doc("layout/mill");MP.m.hrf=cdb.doc("layout/histm");cref=cdb.doc("layout/cats");
   await cloudLoad()}catch(e){canW=false;canQ=false;SBON=false;setSyn("⚠ 無法連線雲端："+e.message,1);$("who").hidden=false;render();showLogin("登入後無法載入資料："+e.message)}}
 $("a_in").onclick=async()=>{try{$("a_m").textContent="登入中…";setSes(toSes(await authP("token?grant_type=password",{email:$("a_e").value.trim(),password:$("a_p").value})));cloudStart()}catch(e){$("a_m").textContent="登入失敗："+e.message}};
 $("a_up").onclick=async()=>{try{$("a_m").textContent="註冊中…";const j=await authP("signup",{email:$("a_e").value.trim(),password:$("a_p").value});if(j.access_token){setSes(toSes(j));cloudStart()}else $("a_m").textContent="註冊完成，請等管理員核准後再登入"}catch(e){$("a_m").textContent="註冊失敗："+e.message}};
@@ -427,10 +447,23 @@ $("rf").onclick=()=>{if(SBON&&!Object.keys(pq).length&&!Object.keys(ps).length)c
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&SBON&&!Object.keys(pq).length&&!Object.keys(ps).length&&!document.querySelector("dialog[open]"))cloudLoad().catch(()=>{})});
 $("adm").onclick=async()=>{const u=$("udlg");u.innerHTML="載入中…";if(!u.open)u.showModal();const cl='<div class="row"><button data-uc="1" style="margin-left:auto">關閉</button></div>';
  try{const L=await api("profiles?select=id,email,role&order=created_at"),o=(v,t,r)=>`<option value="${v}"${r===v?" selected":""}>${t}</option>`;
-  u.innerHTML='<b>帳號管理</b><div class="s">新註冊的帳號是「待核准」，請改成使用者或管理員再按儲存。</div>'+L.map(p=>`<div class="r" style="flex-wrap:wrap"><span style="flex:1;min-width:150px">${esc(p.email||"")}</span><select data-u="${p.id}" style="width:auto"${p.id===SES.uid?" disabled":""}>${o("pending","待核准",p.role)}${o("user","使用者",p.role)}${o("admin","管理員",p.role)}</select><button data-us="${p.id}">儲存</button></div>`).join("")+cl}
+  u.innerHTML='<b>帳號管理</b><div class="s">新註冊的帳號是「待核准」，請改成使用者或管理員再按儲存。</div>'+L.map(p=>`<div class="r" style="flex-wrap:wrap"><span style="flex:1;min-width:150px">${esc(p.email||"")}</span><select data-u="${p.id}" style="width:auto"${p.id===SES.uid?" disabled":""}>${o("pending","待核准",p.role)}${o("user","使用者",p.role)}${o("admin","管理員",p.role)}</select><button data-us="${p.id}">儲存</button><button data-up="${p.id}">重設密碼</button></div>`).join("")+cl}
  catch(e){u.innerHTML="載入失敗："+esc(e.message)+cl}};
-$("udlg").onclick=async e=>{if(e.target.dataset.uc)return $("udlg").close();const id=e.target.dataset.us;if(!id)return;const sel=$("udlg").querySelector('select[data-u="'+id+'"]');
+$("udlg").onclick=async e=>{if(e.target.dataset.uc)return $("udlg").close();
+ const pu=e.target.dataset.up;if(pu){const pw=prompt("輸入這個帳號的新密碼（至少 6 碼）：");if(!pw)return;if(pw.length<6){alert("密碼至少 6 碼");return}
+  try{await api("rpc/admin_set_password",{method:"POST",body:{p_user:pu,p_password:pw}});e.target.textContent="✓ 已重設"}catch(er){e.target.textContent="失敗";alert("重設失敗："+er.message)}return}const id=e.target.dataset.us;if(!id)return;const sel=$("udlg").querySelector('select[data-u="'+id+'"]');
  try{await api("profiles?id=eq."+id,{method:"PATCH",prefer:"return=minimal",body:{role:sel.value}});e.target.textContent="✓ 已儲存"}catch(er){e.target.textContent="失敗"}};
+$("a_sp").onchange=()=>{$("a_p").type=$("a_sp").checked?"text":"password"};
+$("pw").onclick=async()=>{const pw=prompt("輸入你的新密碼（至少 6 碼）：");if(!pw)return;if(pw.length<6){alert("密碼至少 6 碼");return}
+ try{const r=await fetch(SB_URL+"/auth/v1/user",{method:"PUT",headers:Object.assign(H0(),{Authorization:"Bearer "+await tok()}),body:JSON.stringify({password:pw})});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.msg||j.message||("HTTP "+r.status))}alert("密碼已更新")}catch(e){alert("更新失敗："+e.message)}};
+function openCats(){const d=$("kdlg"),cnt=c=>items.filter(i=>i.cat===c).length;
+ d.innerHTML='<b>編輯分類</b><div class="s">可新增加工刀具的分類；還有刀具的分類不能刪除。</div>'+CATS.map((c,i)=>`<div class="r"><span>${c.replace(/</g,"&lt;")}（${cnt(c)} 筆）</span><button data-k="${i}">刪除</button></div>`).join("")+'<div class="row"><input id="k_n" placeholder="新分類名稱（例：鑽頭刀桿）"><button class="p" data-k="add">新增</button></div><div id="k_m" class="s" style="color:var(--warn)"></div><div class="row"><button data-k="x" style="margin-left:auto">關閉</button></div>';
+ if(!d.open)d.showModal()}
+$("kdlg").onclick=e=>{const k=e.target.dataset.k;if(k===undefined||!canW)return;if(k==="x")return $("kdlg").close();
+ if(k==="add"){const n=$("k_n").value.trim();if(!n)return;if(CATS.includes(n)){$("k_m").textContent="已經有這個分類";return}CATS.push(n);saveCats();render();openCats();return}
+ const c=CATS[+k];if(items.some(i=>i.cat===c)){$("k_m").textContent="「"+c+"」還有刀具，請先把刀具移到其他分類再刪除";return}
+ if(CATS.length<=1){$("k_m").textContent="至少要保留一個分類";return}
+ CATS.splice(+k,1);if(cat===c)cat="全部";saveCats();render();openCats()};
 if(CLOUD){if(SES)cloudStart();else showLogin()}
 whoP.then(v=>{if(!CLOUD)canW=v;render()});
 render();
