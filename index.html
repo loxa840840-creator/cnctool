@@ -32,7 +32,7 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 .fg{display:grid;width:max-content;background:#fff}
 .fc{box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;white-space:pre-line;overflow:hidden;color:#111;word-break:break-all;padding:0 1px;border-style:solid;border-color:#333}
 .fc.fp{overflow:visible;white-space:nowrap;word-break:normal;z-index:2}
-.fc.fu{cursor:pointer}.fc.fu:hover{outline:2px solid var(--ac);outline-offset:-2px}
+.fc.fu{cursor:pointer}.fc.sel{outline:3px solid #ef4444;outline-offset:-3px;z-index:3}.fth{display:block;font-size:.72em;font-weight:400;color:#475569;line-height:1.1}.fc.fu:hover{outline:2px solid var(--ac);outline-offset:-2px}
 .fc.hit{outline:3px solid #f59e0b;outline-offset:-3px;position:relative;z-index:1}
 .fg.f .fc:not(.hit){opacity:.35}
 .ro [data-a=dec],.ro [data-a=inc],.ro [data-a=edit],.ro [data-a=del],.ro [data-a=apply],.ro [data-a=dellog],.ro .adm{display:none}
@@ -46,7 +46,7 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 .ei{width:64px;padding:2px 6px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:32px 0}
 </style></head><body><main>
-<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.4.0</span> <button class="lgb" style="font-size:12px;padding:2px 8px;margin-left:6px">ไทย</button></h1>
+<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.5.0</span> <button class="lgb" style="font-size:12px;padding:2px 8px;margin-left:6px">ไทย</button></h1>
 <div id="who" class="row s" hidden style="margin:0 0 8px"><span id="who_t"></span><span id="syn"></span><button id="rf">↻ 重新整理</button><button id="adm" hidden>👥 帳號管理</button><button id="pw">🔑 改密碼</button><button id="lo">登出</button></div>
 <div id="rob" class="s" hidden style="margin-bottom:8px">👁 唯讀模式：只有管理者可以修改</div>
 <div class="seg"><button id="v_l" class="on">刀桿清單</button><button id="v_m">車床位置圖</button><button id="v_n">銑床位置圖</button><button id="v_p">加工產品</button><button id="v_f">現場機台</button></div>
@@ -86,11 +86,12 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 <dialog id="pdlg"></dialog>
 <dialog id="pldg"></dialog>
 <dialog id="fdlg"></dialog>
+<dialog id="fedlg"></dialog>
 <dialog id="xdlg"></dialog>
 </main>
 <script id="embedded-data" type="application/json">null</script>
 <script id="app-js">
-const APP_VERSION="1.4.0";
+const APP_VERSION="1.5.0";
 const SB_URL="https://ycoyzffgqlxzhhpnctoq.supabase.co",SB_KEY="sb_publishable_1xyIZq2vpBUOLfd2jps1oQ_A5tHFAZg";
 const CLOUD=!window.claude&&!!SB_URL;let SBON=false,canQ=false,SES=null,lastT=new Map();
 const MAIN_HTML=document.querySelector("main").outerHTML;
@@ -608,21 +609,21 @@ const TH=[
 ["對應 Excel 欄位","จับคู่คอลัมน์ Excel"],["請確認每個項目對應到 Excel 的哪一欄","โปรดตรวจสอบว่าแต่ละหัวข้อตรงกับคอลัมน์ใดใน Excel"],["產品欄位","คอลัมน์ผลิตภัณฑ์"],["刀具型號欄位","คอลัมน์รุ่นเครื่องมือ"],
 ["刀壽欄位（每把刀可加工幾件）","คอลัมน์อายุมีด (มีด 1 ใบผลิตได้กี่ชิ้น)"],["預計產量欄位（可不選）","คอลัมน์ปริมาณผลิต (ไม่เลือกก็ได้)"],["（不使用）","(ไม่ใช้)"],["匯入方式","วิธีนำเข้า"],
 ["取代現有資料","แทนที่ข้อมูลเดิม"],["合併加入","รวมเข้ากับข้อมูลเดิม"],["匯入","นำเข้า"],["列，新增 "," แถว เพิ่ม "],
-["現場機台圖","ผังเครื่องจักรหน้างาน"],["匯出 HTML","ส่งออก HTML"],["每月","ต่อเดือน"],["匯出","ส่งออก"],["點一下","แตะ"],["個產品","ผลิตภัณฑ์"],[" 列資料）"," แถว)"],["（共 ","(ทั้งหมด "]
+["現場機台圖","ผังเครื่องจักรหน้างาน"],["編輯排版","แก้ไขการจัดวาง"],["新增方塊","เพิ่มบล็อก"],["還原整張圖","คืนค่าทั้งผัง"],["再按一次確定還原","กดอีกครั้งเพื่อยืนยันคืนค่า"],["依產品上色","ใส่สีตามผลิตภัณฑ์"],["這張圖還沒有指定加工產品","ผังนี้ยังไม่ได้กำหนดผลิตภัณฑ์"],["編輯排版模式：點任何方塊可改顏色、文字、大小、位置。機台的產品請關閉編輯模式後點機台修改。","โหมดแก้ไขการจัดวาง: แตะบล็อกใดก็ได้เพื่อเปลี่ยนสี ข้อความ ขนาด ตำแหน่ง หากต้องการเปลี่ยนผลิตภัณฑ์ของเครื่อง โปรดปิดโหมดแก้ไขแล้วแตะที่เครื่อง"],["（機台／產品方塊，文字請關閉編輯模式後修改）","(บล็อกเครื่อง/ผลิตภัณฑ์ โปรดปิดโหมดแก้ไขแล้วแก้ข้อความ)"],["編輯方塊","แก้ไขบล็อก"],["背景顏色","สีพื้นหลัง"],["無色","ไม่มีสี"],["字級","ขนาดตัวอักษร"],["粗體","ตัวหนา"],["移動（連同機台與產品一起）","ย้าย (พร้อมเครื่องและผลิตภัณฑ์)"],["移動（單一方塊）","ย้าย (บล็อกเดียว)"],["大小（列 × 欄）","ขนาด (แถว × คอลัมน์)"],["列 －","แถว －"],["列 ＋","แถว ＋"],["欄 －","คอลัมน์ －"],["欄 ＋","คอลัมน์ ＋"],["刪除方塊","ลบบล็อก"],["還原此方塊","คืนค่าบล็อกนี้"],["完成","เสร็จสิ้น"],["新方塊","บล็อกใหม่"],["文字","ข้อความ"],["⬆ 從 Excel 匯入產品","⬆ นำเข้าผลิตภัณฑ์จาก Excel"],["刀具型號欄位（可不選）","คอลัมน์รุ่นเครื่องมือ (ไม่เลือกก็ได้)"],["刀壽欄位（每把刀可加工幾件，可不選）","คอลัมน์อายุมีด (มีด 1 ใบผลิตได้กี่ชิ้น ไม่เลือกก็ได้)"],["A廠","โรงงาน A"],["D廠","โรงงาน D"],["刀壽資料 ","ข้อมูลอายุมีด "],["匯出 HTML","ส่งออก HTML"],["每月","ต่อเดือน"],["匯出","ส่งออก"],["點一下","แตะ"],["個產品","ผลิตภัณฑ์"],[" 列資料）"," แถว)"],["（共 ","(ทั้งหมด "]
 ];
 TH.sort((a,b)=>b[0].length-a[0].length);
-let LANG="zh";try{LANG=localStorage.getItem("toollang")||"zh"}catch(e){}
+let LANG="both";try{LANG=localStorage.getItem("toollang")||"both"}catch(e){}
 const ORG=new WeakMap();let trT=0;
-const trS=s=>{if(LANG!=="th")return s;for(const[z,t]of TH)if(s.includes(z))s=s.split(z).join(t);return s};
+const THRE=new RegExp(TH.map(e=>e[0].replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|"),"g"),THM=new Map(TH);
+const trS=s=>{if(LANG==="zh")return s;if(LANG==="th")return s.replace(THRE,m=>THM.get(m));const core=s.trim().replace(/^[^\u3400-\u9fffA-Za-z0-9]*/,"");return s.replace(THRE,m=>m+(core===m?" ":" (")+THM.get(m)+(core===m?"":")"))};
 function trApply(){const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
- while(n=w.nextNode()){const p=n.parentNode&&n.parentNode.nodeName;if(p==="SCRIPT"||p==="STYLE")continue;const v=n.data;let o=ORG.get(n);if(!o||o.t!==v)o={z:v,t:v};const t=LANG==="th"?trS(o.z):o.z;if(t!==v)n.data=t;o.t=t;ORG.set(n,o)}
- document.querySelectorAll("[placeholder],[title]").forEach(el=>{for(const a of["placeholder","title"]){if(!el.hasAttribute(a))continue;const k="oz"+a,cur=el.getAttribute(a);if(el.dataset[k]===undefined||el.dataset[k+"t"]!==cur)el.dataset[k]=cur;const t=LANG==="th"?trS(el.dataset[k]):el.dataset[k];el.dataset[k+"t"]=t;if(cur!==t)el.setAttribute(a,t)}})}
+ while(n=w.nextNode()){const p=n.parentNode&&n.parentNode.nodeName;if(p==="SCRIPT"||p==="STYLE"||(n.parentNode.closest&&n.parentNode.closest(".fc")))continue;const v=n.data;let o=ORG.get(n);if(!o||o.t!==v)o={z:v,t:v};const t=LANG==="zh"?o.z:trS(o.z);if(t!==v)n.data=t;o.t=t;ORG.set(n,o)}
+ document.querySelectorAll("[placeholder],[title]").forEach(el=>{for(const a of["placeholder","title"]){if(!el.hasAttribute(a))continue;const k="oz"+a,cur=el.getAttribute(a);if(el.dataset[k]===undefined||el.dataset[k+"t"]!==cur)el.dataset[k]=cur;const t=LANG==="zh"?el.dataset[k]:trS(el.dataset[k]);el.dataset[k+"t"]=t;if(cur!==t)el.setAttribute(a,t)}})}
 new MutationObserver(()=>{clearTimeout(trT);trT=setTimeout(trApply,30)}).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","title"]});
-const langBtns=()=>document.querySelectorAll(".lgb");
-function setLang(l){LANG=l;try{localStorage.setItem("toollang",l)}catch(e){}langBtns().forEach(b=>{b.textContent=l==="th"?"中文":"ไทย"});trApply()}
-langBtns().forEach(b=>{b.textContent=LANG==="th"?"中文":"ไทย";b.onclick=()=>setLang(LANG==="th"?"zh":"th")});
-if(LANG==="th")trApply();
-
+const langBtns=()=>document.querySelectorAll(".lgb"),LMODES=["both","zh","th"],LLBL={both:"中｜ไทย",zh:"中文",th:"ไทย"};
+function setLang(l){LANG=l;try{localStorage.setItem("toollang",l)}catch(e){}langBtns().forEach(b=>{b.textContent=LLBL[l]});trApply();try{render()}catch(e){}}
+langBtns().forEach(b=>{b.textContent=LLBL[LANG];b.onclick=()=>setLang(LMODES[(LMODES.indexOf(LANG)+1)%3])});
+if(LANG!=="zh")trApply();
 $("a_sp").onchange=()=>{$("a_p").type=$("a_sp").checked?"text":"password"};
 $("pw").onclick=async()=>{const pw=await askText("輸入你的新密碼（至少 6 碼）","");if(!pw)return;if(pw.length<6){setSyn("密碼至少 6 碼",1);return}
  try{const r=await fetch(SB_URL+"/auth/v1/user",{method:"PUT",headers:Object.assign(H0(),{Authorization:"Bearer "+await tok()}),body:JSON.stringify({password:pw})});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.msg||j.message||("HTTP "+r.status))}setSyn("✓ 密碼已更新")}catch(e){setSyn("⚠ 更新失敗："+e.message,1)}};
@@ -635,7 +636,7 @@ function calcNeed(){const m=new Map();for(const r of SPEC.rows){const l=+r.l,v=+
 function renderProdView(){const k=$("q").value.trim().toLowerCase(),adm=canW;
  let h='<div class="row" style="margin:0 0 8px"><button class="'+(pTab==="list"?"p":"")+'" data-pt="list">產品清單</button><button class="'+(pTab==="spec"?"p":"")+'" data-pt="spec">刀壽與叫刀計算</button></div>';
  if(pTab==="list"){const L=PRODS.map((p,i)=>[p,i]).filter(([p])=>!k||p.toLowerCase().includes(k));
-  h+=(adm?'<textarea id="pv_n" rows="2" placeholder="新增加工產品（可一次貼多筆，一行一個）"></textarea><div class="row"><button class="p" id="pv_a">＋ 新增產品</button><button id="pv_i">從現場機台圖匯入產品名稱</button></div>':"")+`<div id="pv_m" class="s" style="color:var(--warn)">${esc(prodMsg)}</div>`
+  h+=(adm?'<textarea id="pv_n" rows="2" placeholder="新增加工產品（可一次貼多筆，一行一個）"></textarea><div class="row"><button class="p" id="pv_a">＋ 新增產品</button><button id="pv_i">從現場機台圖匯入產品名稱</button><button id="sp_imp">⬆ 從 Excel 匯入產品</button><input id="sp_file" type="file" accept=".xlsx,.xls,.csv" hidden></div>':"")+`<div id="pv_m" class="s" style="color:var(--warn)">${esc(prodMsg)}</div>`
   +(L.length?L.map(([p,i])=>{const ts=items.filter(t=>(t.prods||[]).includes(p));return `<div class="card"><div class="top"><div class="m">${esc(p)}</div><span class="tag">${ts.length} 支刀具</span></div><div class="s">${ts.length?ts.map(t=>esc(t.model)+(t.pn?"（"+esc(t.pn)+"）":"")).join("、"):"尚未有刀具用在這個產品"}</div>${machLine(p)}${adm?`<div class="row"><button data-pr="${i}">改名</button><button data-pd="${i}"${pdel===p?' class="p" style="background:var(--warn);border-color:var(--warn)"':""}>${pdel===p?"再按一次確定刪除（會從刀具移除）":"刪除"}</button></div>`:""}</div>`}).join(""):'<div class="empty">'+(PRODS.length?"沒有符合的產品":"尚無加工產品，請先新增")+"</div>")}
  else{const C=calcNeed();
   if(adm)h+='<div class="row"><button class="p" id="sp_imp">⬆ 匯入 Excel（產品與刀壽）</button><button id="sp_tpl">下載範本</button><button id="sp_exp">匯出叫刀清單</button><button id="sp_clr"'+(spClr?' class="p" style="background:var(--warn);border-color:var(--warn)"':"")+'>'+(spClr?"再按一次確定清空":"清空刀壽資料")+'</button><input id="sp_file" type="file" accept=".xlsx,.xls,.csv" hidden></div>';
@@ -653,12 +654,12 @@ async function spFile(f){try{await loadXlsx();const wb=XLSX.read(await f.arrayBu
  xrows={h:rows[hi].map(x=>String(x).trim()),d:rows.slice(hi+1)};openXmap()}catch(e){prodMsg="讀取 Excel 失敗："+e.message;renderProdView()}}
 function guessCols(h){const f=(re,ex)=>h.findIndex((x,i)=>re.test(x)&&!(ex||[]).includes(i));const l=f(/刀壽|壽命|life|可加工|加工數|每刀|件\/刀/i),p=f(/產品|品名|品號|料號|part|product/i,[l]),t=f(/刀具|刀片|刀桿|型號|tool|insert|刀/i,[l,p]),v=f(/產量|需求|計畫|預計|數量|volume|qty|demand|月/i,[l,p,t]);return{p,t,l,v}}
 function openXmap(){const g=guessCols(xrows.h),d=$("xdlg"),opt=(s,none)=>(none?'<option value="-1">（不使用）</option>':"")+xrows.h.map((x,i)=>`<option value="${i}"${i===s?" selected":""}>${esc(x||"Col "+(i+1))}</option>`).join("");
- d.innerHTML=`<b>對應 Excel 欄位</b><div class="s">請確認每個項目對應到 Excel 的哪一欄（共 ${xrows.d.length} 列資料）。</div><label>產品欄位</label><select id="xm_p">${opt(g.p)}</select><label>刀具型號欄位</label><select id="xm_t">${opt(g.t)}</select><label>刀壽欄位（每把刀可加工幾件）</label><select id="xm_l">${opt(g.l)}</select><label>預計產量欄位（可不選）</label><select id="xm_v">${opt(g.v,1)}</select><label>匯入方式</label><select id="xm_mode"><option value="replace">取代現有資料</option><option value="merge">合併加入</option></select><div class="row"><button id="xm_x" style="margin-left:auto">取消</button><button class="p" id="xm_ok">匯入</button></div>`;if(!d.open)d.showModal()}
+ d.innerHTML=`<b>對應 Excel 欄位</b><div class="s">請確認每個項目對應到 Excel 的哪一欄（共 ${xrows.d.length} 列資料）。</div><label>產品欄位</label><select id="xm_p">${opt(Math.max(0,g.p))}</select><label>刀具型號欄位（可不選）</label><select id="xm_t">${opt(g.t,1)}</select><label>刀壽欄位（每把刀可加工幾件，可不選）</label><select id="xm_l">${opt(g.l,1)}</select><label>預計產量欄位（可不選）</label><select id="xm_v">${opt(g.v,1)}</select><label>匯入方式</label><select id="xm_mode"><option value="replace">取代現有資料</option><option value="merge">合併加入</option></select><div class="row"><button id="xm_x" style="margin-left:auto">取消</button><button class="p" id="xm_ok">匯入</button></div>`;if(!d.open)d.showModal()}
 $("xdlg").onclick=e=>{const id=e.target.id;if(id==="xm_x")return $("xdlg").close();if(id!=="xm_ok"||!canW)return;
  const ci=k=>+$("xm_"+k).value,P=ci("p"),T=ci("t"),Lc=ci("l"),V=ci("v"),num=x=>{const n=parseFloat(String(x).replace(/[, ]/g,""));return isFinite(n)?n:0};
- const rows=xrows.d.map(r=>({p:String(r[P]??"").trim(),t:String(r[T]??"").trim(),l:num(r[Lc]),v:V>=0?num(r[V]):0})).filter(r=>r.p||r.t);
- if($("xm_mode").value==="replace")SPEC.rows=rows;else{const m=new Map(SPEC.rows.map(r=>[nz(r.p)+"|"+nz(r.t),r]));rows.forEach(r=>m.set(nz(r.p)+"|"+nz(r.t),r));SPEC.rows=[...m.values()]}
- const np=[...new Set(rows.map(r=>r.p).filter(x=>x&&!PRODS.includes(x)))];np.forEach(x=>PRODS.push(x));if(np.length)saveProds();saveSpec();$("xdlg").close();prodMsg="✓ 已匯入 "+rows.length+" 列，新增 "+np.length+" 個產品";pTab="spec";renderProdView()};
+ const rows=xrows.d.map(r=>({p:String(r[P]??"").trim(),t:T>=0?String(r[T]??"").trim():"",l:Lc>=0?num(r[Lc]):0,v:V>=0?num(r[V]):0})).filter(r=>r.p),sr=rows.filter(r=>r.t);
+ if(sr.length){if($("xm_mode").value==="replace")SPEC.rows=sr;else{const m=new Map(SPEC.rows.map(r=>[nz(r.p)+"|"+nz(r.t),r]));sr.forEach(r=>m.set(nz(r.p)+"|"+nz(r.t),r));SPEC.rows=[...m.values()]}}
+ const np=[...new Set(rows.map(r=>r.p).filter(x=>x&&!PRODS.includes(x)))];np.forEach(x=>PRODS.push(x));if(np.length)saveProds();saveSpec();$("xdlg").close();prodMsg="✓ 已匯入 "+rows.length+" 列，新增 "+np.length+" 個產品"+(sr.length?"，刀壽資料 "+sr.length+" 列":"");renderProdView()};
 async function spTpl(){try{await loadXlsx();const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["產品","刀具型號","刀壽(件/刀)","預計產量(件/月)"],["V4-1200","CNMG120408",200,3000],["V4-1301+1302","CNMG120408",150,1800]]),"產品刀壽");XLSX.writeFile(wb,"加工產品刀壽範本.xlsx")}catch(e){prodMsg=e.message;renderProdView()}}
 async function spExp(){try{await loadXlsx();const C=calcNeed(),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["刀具型號","目前庫存","最低庫存","需求刀數("+SPEC.period+")","建議叫貨","使用產品"]].concat(C.map(c=>[c.t,c.qty,c.min,c.need,c.order,c.ps.join("、")]))),"叫刀清單");XLSX.writeFile(wb,"叫刀清單.xlsx")}catch(e){prodMsg=e.message;renderProdView()}}
 $("prodv").onclick=async e=>{const t=e.target;if(t.dataset.pt){pTab=t.dataset.pt;prodMsg="";spClr=false;renderProdView();return}if(!canW)return;
@@ -698,14 +699,61 @@ const shn=s=>s.replace(/產品$/,"");
 function facUnits(){return FU.map(u=>{const S=FACT[u.sh],o=FAC.ov[u.sh+"|"+u.key]||{},p0=u.pi>=0?S.cells[u.pi][4]:"",m0=S.cells[u.mi][4];return{...u,p0,m0,p:o.p!==undefined?o.p:p0,m:o.m!==undefined?o.m:m0}})}
 const facProducts=()=>[...new Set(FU.filter(u=>u.pi>=0).map(u=>FACT[u.sh].cells[u.pi][4]).filter(Boolean))];
 function machLine(p){const m=facUnits().filter(u=>u.p===p);return m.length?'<div class="s">機台：'+m.map(u=>esc(shn(u.sh)+" "+u.m)).join("、")+"</div>":""}
-function renderFac(){const S=FACT[facSheet],q=nz($("q").value),old=$("facv").querySelector(".fw"),sl=old?old.scrollLeft:0,st=old?old.scrollTop:0;
+const PAL=["#fde68a","#bfdbfe","#bbf7d0","#fecaca","#e9d5ff","#fed7aa","#a5f3fc","#fbcfe8","#d9f99d","#c7d2fe","#fde047","#99f6e4"];
+const hashS=s=>{let h=0;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))>>>0;return h};
+function facFix(){FAC.cx=FAC.cx||{};FAC.add=FAC.add||{};FAC.pc=FAC.pc||{};FAC.ov=FAC.ov||{}}
+const pcol=p=>FAC.pc[p]||PAL[hashS(p)%PAL.length];
+const LBL={"分電":"ตู้ไฟย่อย","逃生門":"ประตูหนีไฟ","捲門":"ประตูม้วน","鐵捲門":"ประตูม้วนเหล็ก","主電":"ไฟหลัก","飲水機":"ที่กดน้ำดื่ม","刀模具室":"ห้องมีด/แม่พิมพ์","雜物室":"ห้องเก็บของ","電梯":"ลิฟต์","樓梯":"บันได","茶水室":"ห้องน้ำชา","男廁":"ห้องน้ำชาย","女廁":"ห้องน้ำหญิง","龍門":"เครื่องแกนตั้งแบบเกต","油水:":"น้ำมัน/น้ำ:","培訓技士:":"ช่างฝึกหัด:","幹部:":"หัวหน้างาน:","早班08:00-17:00":"กะเช้า 08:00-17:00","A廠產品":"ผลิตภัณฑ์โรงงาน A","D廠產品":"ผลิตภัณฑ์โรงงาน D","泰國廠A":"โรงงานไทย A","泰國廠-D":"โรงงานไทย D","380V主電箱":"ตู้ไฟหลัก 380V","OFFICE":"สำนักงาน","QCROOM":"ห้อง QC","ELECTRICITYROOM":"ห้องไฟฟ้า","新方塊":"บล็อกใหม่"};
+const LBRE=new RegExp(Object.keys(LBL).sort((a,b)=>b.length-a.length).map(x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|"),"g");
+function facTh(t){const k=String(t).replace(/\s+/g,"");if(LBL[k])return LBL[k];let ch=false;const r=k.replace(LBRE,m=>{ch=true;return LBL[m]+" "});return ch?r.trim():""}
+function facCells(sh){const S=FACT[sh],X=FAC.cx||{},out=[];S.cells.forEach((c,i)=>{const o=X[sh+"|"+i];if(o&&o.x)return;const e=c.slice();if(o){if(o.r)e[0]=o.r;if(o.c)e[1]=o.c;if(o.rs)e[2]=o.rs;if(o.cs)e[3]=o.cs;if(o.t!==undefined)e[4]=o.t;if(o.bg!==undefined)e[5]=o.bg;if(o.b!==undefined)e[6]=o.b;if(o.z)e[7]=o.z}out.push({e,k:String(i),i})});
+ ((FAC.add||{})[sh]||[]).forEach((c,j)=>out.push({e:c,k:"n"+j,i:-1}));return out}
+const curFc=key=>{const[sh,k]=key.split("|"),f=facCells(sh).find(x=>x.k===k);return f?f.e:null};
+let facEdit=false,fk=null,facDel=false,facRst=false;
+function renderFac(){facFix();const S=FACT[facSheet],q=nz($("q").value),old=$("facv").querySelector(".fw"),sl=old?old.scrollLeft:0,st=old?old.scrollTop:0,adm=canW;
  const U=facUnits().filter(u=>u.sh===facSheet),role={};U.forEach(u=>{role[u.mi]={u,k:"m"};if(u.pi>=0)role[u.pi]={u,k:"p"}});
- let any=false,h='<div class="row" style="margin:0 0 8px">'+Object.keys(FACT).map(s=>`<button class="${s===facSheet?"p":""}" data-sh="${s}">${shn(s)}</button>`).join("")+'<span style="flex:1"></span><button data-z="-">－</button><button data-z="+">＋</button></div>';
- const cells=S.cells.map((c,i)=>{const r=role[i];let t=c[4];if(r){t=r.k==="m"?r.u.m:r.u.p;if(r.k==="m"&&r.u.pi<0&&r.u.p)t+="\n"+r.u.p}
-  const hit=q&&nz(t).includes(q);if(hit)any=true;const b=c[8];
-  return `<div class="fc${r?" fu":""}${r&&r.k==="p"?" fp":""}${hit?" hit":""}" ${r?`data-u="${r.u.sh}|${r.u.key}" title="${canW?"點一下修改產品":""}"`:""} style="grid-area:${c[0]}/${c[1]}/span ${c[2]}/span ${c[3]};background:${c[5]||"#fff"};font-size:${Math.max(7,Math.round(c[7]*1.05))}px;font-weight:${c[6]?700:400};border-width:${b&2?1:0}px ${b&4?1:0}px ${b&8?1:0}px ${b&1?1:0}px">${esc(t)}</div>`}).join("");
+ const prods=[...new Set(U.map(u=>u.p).filter(Boolean))];let any=false;
+ let h='<div class="row" style="margin:0 0 8px">'+Object.keys(FACT).map(s=>`<button class="${s===facSheet?"p":""}" data-sh="${s}">${shn(s)}</button>`).join("")+'<span style="flex:1"></span>'
+ +(adm?`<button class="${facEdit?"p":""}" data-fe="edit">✏ 編輯排版</button>`+(facEdit?'<button data-fe="add">＋ 新增方塊</button>':"")+`<button data-fe="rst"${facRst?' class="p" style="background:var(--warn);border-color:var(--warn)"':""}>${facRst?"再按一次確定還原":"還原整張圖"}</button>`:"")
+ +`<button class="${FAC.byp?"p":""}" data-fe="byp">🎨 依產品上色</button><button data-z="-">－</button><button data-z="+">＋</button></div>`;
+ if(FAC.byp)h+='<div class="row s" style="margin:0 0 8px">'+(prods.length?prods.map(p=>`<label style="display:inline-flex;align-items:center;gap:4px"><input type="color" style="width:28px;height:24px;padding:0" data-pc="${esc(p)}" value="${pcol(p)}"${adm?"":" disabled"}>${esc(p)}</label>`).join(""):"這張圖還沒有指定加工產品")+"</div>";
+ if(facEdit)h+='<div class="s" style="color:var(--warn);margin:0 0 6px">編輯排版模式：點任何方塊可改顏色、文字、大小、位置。機台的產品請關閉編輯模式後點機台修改。</div>';
+ const cells=facCells(facSheet).map(({e:c,k,i})=>{const r=i>=0?role[i]:null;let t=c[4],bg=c[5];
+  if(r){t=r.k==="m"?r.u.m:r.u.p;if(r.k==="m"&&r.u.pi<0&&r.u.p)t+="\n"+r.u.p;if(FAC.byp&&r.k==="m"&&r.u.p)bg=pcol(r.u.p)}
+  const hit=q&&nz(t).includes(q);if(hit)any=true;const b=c[8];let w=0;for(let x=c[1]-1;x<c[1]-1+c[3];x++)w+=S.cols[x]||0;
+  const thx=LANG!=="zh"&&!r?facTh(t):"",wide=w>=56,inner=(LANG==="th"&&thx)?esc(thx):esc(t)+(LANG==="both"&&thx&&wide?`<small class="fth">${esc(thx)}</small>`:""),tip=thx&&!wide?` title="${esc(thx)}"`:"";
+  return `<div class="fc${r?" fu":""}${r&&r.k==="p"?" fp":""}${hit?" hit":""}${facEdit&&fk===facSheet+"|"+k?" sel":""}" data-ck="${facSheet}|${k}"${r?` data-u="${r.u.sh}|${r.u.key}"`:""}${tip} style="grid-area:${c[0]}/${c[1]}/span ${c[2]}/span ${c[3]};background:${bg||"#fff"};font-size:${Math.max(7,Math.round(c[7]*1.05))}px;font-weight:${c[6]?700:400};border-width:${b&2?1:0}px ${b&4?1:0}px ${b&8?1:0}px ${b&1?1:0}px">${inner}</div>`}).join("");
  $("facv").innerHTML=h+`<div class="fw"><div class="fg${q?" f":""}" style="zoom:${facZ};grid-template-columns:${S.cols.map(w=>w+"px").join(" ")};grid-template-rows:${S.rows.map(w=>w+"px").join(" ")}">${cells}</div></div>`+(q&&!any?'<div class="empty">這張圖裡找不到「'+esc($("q").value)+'」</div>':"");
- const nw=$("facv").querySelector(".fw");if(nw){nw.scrollLeft=sl;nw.scrollTop=st;const hit=nw.querySelector(".hit");if(hit&&q)hit.scrollIntoView({block:"nearest",inline:"center"})}}
+ const nw=$("facv").querySelector(".fw");if(nw){nw.scrollLeft=sl;nw.scrollTop=st;const hi=nw.querySelector(".hit");if(hi&&q)hi.scrollIntoView({block:"nearest",inline:"center"})}}
+function fcPatch(key,p){const[sh,k]=key.split("|"),f=facCells(sh).find(x=>x.k===k);if(!f)return;const e=f.e,R=FACT[sh].rows.length,C=FACT[sh].cols.length;
+ const n={r:p.r??e[0],c:p.c??e[1],rs:p.rs??e[2],cs:p.cs??e[3],t:p.t??e[4],bg:p.bg??e[5],b:p.b??e[6],z:p.z??e[7]};
+ n.rs=Math.max(1,Math.min(n.rs,R));n.cs=Math.max(1,Math.min(n.cs,C));n.r=Math.max(1,Math.min(n.r,R-n.rs+1));n.c=Math.max(1,Math.min(n.c,C-n.cs+1));
+ if(k[0]==="n"){const a=FAC.add[sh][+k.slice(1)];a[0]=n.r;a[1]=n.c;a[2]=n.rs;a[3]=n.cs;a[4]=n.t;a[5]=n.bg;a[6]=n.b;a[7]=n.z}
+ else FAC.cx[key]=Object.assign(FAC.cx[key]||{},{r:n.r,c:n.c,rs:n.rs,cs:n.cs,bg:n.bg,b:n.b,z:n.z},p.t!==undefined?{t:n.t}:{})}
+function fcMove(key,dr,dc){const[sh,k]=key.split("|"),keys=[key];if(k[0]!=="n"){const i=+k,u=FU.find(x=>x.sh===sh&&(x.mi===i||x.pi===i));if(u)[u.mi,u.pi].forEach(j=>{if(j>=0&&j!==i)keys.push(sh+"|"+j)})}
+ keys.forEach(kk=>{const e=curFc(kk);if(e)fcPatch(kk,{r:e[0]+dr,c:e[1]+dc})})}
+function openFacEd(key){fk=key;const[sh,k]=key.split("|"),f=facCells(sh).find(x=>x.k===k);if(!f)return;const e=f.e,unit=f.i>=0&&FU.some(u=>u.sh===sh&&(u.mi===f.i||u.pi===f.i)),d=$("fedlg");
+ d.innerHTML=`<b>編輯方塊</b><label>文字</label><textarea id="fe_t" rows="2"${unit?" disabled":""}>${esc(unit?"（機台／產品方塊，文字請關閉編輯模式後修改）":e[4])}</textarea>
+<label>背景顏色</label><div class="row"><input type="color" id="fe_bg" value="${/^#[0-9a-f]{6}$/i.test(e[5])?e[5]:"#ffffff"}" style="width:60px"><button data-fe2="nobg">無色</button>${PAL.map(c=>`<button data-sw="${c}" style="background:${c};width:26px;height:26px;padding:0"></button>`).join("")}</div>
+<div class="g"><div><label>字級</label><input id="fe_z" type="number" min="6" max="60" value="${e[7]}"></div><div><label>&nbsp;</label><label><input id="fe_b" type="checkbox" style="width:auto"${e[6]?" checked":""}> 粗體</label></div></div>
+<label>${unit?"移動（連同機台與產品一起）":"移動（單一方塊）"}</label><div class="row"><button data-mv="0,-1">←</button><button data-mv="-1,0">↑</button><button data-mv="1,0">↓</button><button data-mv="0,1">→</button></div>
+<label>大小（列 × 欄）</label><div class="row"><button data-sz="-1,0">列 －</button><button data-sz="1,0">列 ＋</button><button data-sz="0,-1">欄 －</button><button data-sz="0,1">欄 ＋</button></div>
+<div class="row"><button data-fe2="del"${facDel?' class="p" style="background:var(--warn);border-color:var(--warn)"':""}>${facDel?"再按一次確定刪除":"刪除方塊"}</button><button data-fe2="rs">還原此方塊</button><button class="p" data-fe2="x" style="margin-left:auto">完成</button></div>`;
+ if(!d.open)d.showModal();renderFac()}
+$("fedlg").onclick=e=>{const t=e.target,key=fk,d=t.dataset;if(!key||!canW)return;
+ if(d.sw!==undefined)fcPatch(key,{bg:d.sw});
+ else if(d.mv){const[a,b]=d.mv.split(",").map(Number);fcMove(key,a,b)}
+ else if(d.sz){const[a,b]=d.sz.split(",").map(Number),c0=curFc(key);fcPatch(key,{rs:c0[2]+a,cs:c0[3]+b})}
+ else if(d.fe2==="nobg")fcPatch(key,{bg:""});
+ else if(d.fe2==="rs")delete FAC.cx[key];
+ else if(d.fe2==="del"){if(!facDel){facDel=true;openFacEd(key);return}facDel=false;const[sh,k]=key.split("|");if(k[0]==="n")FAC.add[sh].splice(+k.slice(1),1);else FAC.cx[key]=Object.assign(FAC.cx[key]||{},{x:1});fk=null;saveFac();$("fedlg").close();renderFac();return}
+ else if(d.fe2==="x"){$("fedlg").close();return}
+ else return;
+ facDel=false;saveFac();renderFac();openFacEd(key)};
+$("fedlg").onchange=e=>{const t=e.target,key=fk;if(!key||!canW)return;
+ if(t.id==="fe_t")fcPatch(key,{t:t.value});else if(t.id==="fe_bg")fcPatch(key,{bg:t.value});else if(t.id==="fe_b")fcPatch(key,{b:t.checked?1:0});else if(t.id==="fe_z")fcPatch(key,{z:Math.max(6,Math.min(60,+t.value||12))});else return;saveFac();renderFac()};
+$("fedlg").addEventListener("close",()=>{fk=null;facDel=false;renderFac()});
+function addFacBlock(){facFix();const sh=facSheet;(FAC.add[sh]=FAC.add[sh]||[]).push([2,2,3,4,"新方塊","#fde68a",1,14,15,""]);saveFac();openFacEd(sh+"|n"+(FAC.add[sh].length-1))}
 function openFacU(uk,pSel,mVal){fu=facUnits().find(u=>u.sh+"|"+u.key===uk);if(!fu)return;const d=$("fdlg"),cur=pSel!==undefined?pSel:fu.p,list=[...PRODS];if(cur&&!list.includes(cur))list.push(cur);
  d.innerHTML=`<b>${shn(fu.sh)} · 機台 ${esc(fu.m0)}</b><label>目前加工產品</label><select id="fd_p"><option value="">（空白）</option>${list.map(p=>`<option value="${esc(p)}"${p===cur?" selected":""}>${esc(p)}</option>`).join("")}</select>
 <div class="row"><input id="fd_np" placeholder="沒有想要的產品？在這裡新增" style="flex:1;min-width:0"><button id="fd_ap" type="button">＋ 新增產品</button></div>
@@ -715,9 +763,14 @@ $("fdlg").onclick=e=>{const id=e.target.id;if(id==="fd_x")return $("fdlg").close
  if(id==="fd_ap"){const n=$("fd_np").value.trim();if(!n)return;if(!PRODS.includes(n)){PRODS.push(n);saveProds()}openFacU(k,n,$("fd_m").value);return}
  if(id==="fd_r"){delete FAC.ov[k];saveFac();$("fdlg").close();renderFac();return}
  if(id==="fd_s"){const p=$("fd_p").value,m=$("fd_m").value.trim(),o={};if(p!==fu.p0)o.p=p;if(m&&m!==fu.m0)o.m=m;if(Object.keys(o).length)FAC.ov[k]=o;else delete FAC.ov[k];saveFac();$("fdlg").close();renderFac()}};
-$("facv").onclick=e=>{const t=e.target;if(t.dataset.sh){facSheet=t.dataset.sh;renderFac();return}
+$("facv").onclick=e=>{const t=e.target;if(t.dataset.sh){facSheet=t.dataset.sh;facRst=false;renderFac();return}
  if(t.dataset.z){facZ=Math.min(2,Math.max(.4,facZ+(t.dataset.z==="+"?.15:-.15)));renderFac();return}
- const c=t.closest(".fc");if(c&&c.dataset.u&&canW)openFacU(c.dataset.u)};
+ const fe=t.dataset.fe;if(fe){if(fe==="byp"){facFix();FAC.byp=!FAC.byp;saveFac()}else{if(!canW)return;if(fe==="edit")facEdit=!facEdit;else if(fe==="add"){addFacBlock();return}
+   else if(fe==="rst"){if(!facRst){facRst=true;renderFac();return}facRst=false;facFix();Object.keys(FAC.cx).forEach(kk=>{if(kk.startsWith(facSheet+"|"))delete FAC.cx[kk]});delete FAC.add[facSheet];saveFac()}}
+  renderFac();return}
+ const c=t.closest(".fc");if(!c)return;if(facEdit&&canW){openFacEd(c.dataset.ck);return}
+ if(c.dataset.u&&canW)openFacU(c.dataset.u)};
+$("facv").onchange=e=>{const t=e.target;if(t.dataset.pc&&canW){facFix();FAC.pc[t.dataset.pc]=t.value;saveFac();renderFac()}};
 $("v_f").onclick=()=>{view="f";focusK=null;render()};
 function openCats(){const d=$("kdlg"),cnt=c=>items.filter(i=>i.cat===c).length;
  d.innerHTML='<b>編輯分類</b><div class="s">可新增加工刀具的分類；還有刀具的分類不能刪除。</div>'+CATS.map((c,i)=>`<div class="r"><span>${c.replace(/</g,"&lt;")}（${cnt(c)} 筆）</span><button data-r="${i}">改名</button><button data-k="${i}">刪除</button></div>`).join("")+'<div class="row"><input id="k_n" placeholder="新分類名稱（例：鑽頭刀桿）"><button class="p" data-k="add">新增</button></div><div id="k_m" class="s" style="color:var(--warn)"></div><div class="row"><button data-k="x" style="margin-left:auto">關閉</button></div>';
