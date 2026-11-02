@@ -49,6 +49,8 @@ dialog label{display:block;font-size:13px;color:var(--mut);margin-top:8px}dialog
 .mg.f .c:not(.hit){opacity:.3}
 .ei{width:64px;padding:2px 6px;text-align:center}
 .empty{text-align:center;color:var(--mut);padding:32px 0}
+#v_n{display:none!important}#cabbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}#cabbar[hidden]{display:none}#cabbar .cab{flex:0 0 auto}
+
 .tb.tp tr,.tb.tp td{box-sizing:border-box}.bar[hidden]{display:none!important}
 .fc.fu{position:relative}.opb{position:absolute;right:1px;bottom:1px;font-size:9px;line-height:1.2;background:#111;color:#fff;border-radius:6px;padding:0 3px;max-width:96%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #shdlg{width:min(98vw,720px)}.tb.sh select{width:100%;min-width:0;padding:5px 4px;font-size:13px}.tb.sh td,.tb.sh th{padding:6px 3px;text-align:left}
@@ -127,10 +129,10 @@ main.wide{max-width:none}
 @media(max-width:640px){main{padding:10px 10px 40px}h1{font-size:19px}.seg button{min-width:98px;min-height:44px;font-size:14px}input,select,textarea{font-size:16px}dialog{width:96vw!important;padding:14px}.card{padding:12px}.q button{min-width:48px;min-height:48px}.row button{min-height:42px}.tabs button{min-height:40px}#map{padding:3px}#dtool,#who{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}#dtool::-webkit-scrollbar,#who::-webkit-scrollbar{display:none}#dtool button,#who button,#who span{flex:0 0 auto;white-space:nowrap}#dtool button{min-height:36px;font-size:14px}}
 
 </style></head><body><main>
-<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.31.0</span> <button class="lgb" style="font-size:12px;padding:2px 8px;margin-left:6px">ไทย</button></h1>
+<h1>🔧 刀具管理 <span id="ver" style="font-size:13px;font-weight:400;color:var(--mut)">Version 1.32.0</span> <button class="lgb" style="font-size:12px;padding:2px 8px;margin-left:6px">ไทย</button></h1>
 <div id="who" class="row s" hidden style="margin:0 0 8px"><span id="who_t"></span><span id="syn"></span><button id="rf">↻ 重新整理</button><button id="eidb">🪪 改工號</button><button id="adm" hidden>👥 帳號管理</button><button id="pw">🔑 改密碼</button><button id="lo">登出</button></div>
 <div id="rob" class="s" hidden style="margin-bottom:8px">👁 唯讀模式：只有管理者可以修改</div>
-<div class="seg"><button id="v_l" class="on">刀桿清單</button><button id="v_m">車床位置圖</button><button id="v_n">銑床位置圖</button><button id="v_p">加工產品</button><button id="v_f">現場機台</button><button id="v_s">排班</button></div>
+<div class="seg"><button id="v_l" class="on">刀桿清單</button><button id="v_m">模具室</button><button id="v_n" hidden>銑床位置圖</button><button id="v_p">加工產品</button><button id="v_f">現場機台</button><button id="v_s">排班</button></div>
 <div id="dtool" class="row" hidden style="margin:0 0 6px"><button id="d_exp">⬇ 匯出資料</button><button id="d_imp">⬆ 匯入資料</button><button id="d_htm">⬇ 匯出 HTML（含完整資料）</button><button id="nav_ed">✏ 修改分頁名稱</button><button id="rb_btn">🕘 回溯／還原</button><button id="d_emb" hidden>↺ 載入 HTML 內嵌資料</button><button id="d_pub" hidden>📌 把目前資料存進頁面</button><button id="d_bk" hidden>↩ 還原載入前的本機資料</button><button id="d_ok" class="p" hidden>確定匯入（取代目前資料）</button><input id="d_file" type="file" accept=".json,application/json" hidden></div>
 <div id="dmsg" class="s" style="margin-bottom:8px"></div>
 <div class="bar"><input id="q" type="search" placeholder="搜尋型號、品牌、位置…"><button class="p" id="add">＋ 新增</button><button id="ti_imp">⬆ 從 Excel 匯入</button><button id="sel_btn">☑ 批次管理</button><button id="q_btn">📋 紀錄查詢</button><input id="ti_file" type="file" accept=".xlsx,.xls,.csv" hidden></div>
@@ -143,6 +145,7 @@ main.wide{max-width:none}
 <div id="prodv" hidden></div>
 <div id="mtool" class="row" hidden style="flex-wrap:wrap"><button data-g="ac">＋ 新增一欄</button><button data-g="ar">＋ 新增一列</button><button data-g="dc">－ 刪除最後一欄</button><button data-g="dr">－ 刪除最後一列</button><button data-g="undo">↩ 復原上一步</button><button data-g="hist">🕘 歷史紀錄</button></div>
 <div id="mmsg" class="s" style="color:var(--warn)"></div>
+<div id="cabbar" hidden></div>
 <div id="mapctl" class="row" hidden><button data-mz="-">－ 縮小</button><button data-mz="+">＋ 放大</button><button data-mz="fit">全圖</button><button data-mz="full">⛶ 全螢幕</button></div>
 <div id="map" hidden></div>
 <dialog id="dlg">
@@ -184,7 +187,7 @@ main.wide{max-width:none}
 </main>
 <script id="embedded-data" type="application/json">null</script>
 <script id="app-js">
-const APP_VERSION="1.31.0";
+const APP_VERSION="1.32.0";
 const SB_URL="https://ycoyzffgqlxzhhpnctoq.supabase.co",SB_KEY="sb_publishable_1xyIZq2vpBUOLfd2jps1oQ_A5tHFAZg";
 const CLOUD=!window.claude&&!!SB_URL;let SBON=false,canQ=false,SES=null,lastT=new Map();
 const MAIN_HTML=document.querySelector("main").outerHTML;
@@ -234,6 +237,8 @@ function save(){touch();try{localStorage.setItem("tools",JSON.stringify(items))}
  try{const hr=db.doc("layout/hist"),hs=await hr.get();if(hs.exists&&Array.isArray(hs.data().h))hist=clone(hs.data().h);hrf=hr}catch(e){}
  try{const mr=db.doc("layout/mill"),ms=await mr.get();MP.m.lref=mr;if(ms.exists&&ms.data().c){const d=ms.data();MP.m.cells=clone(d.c);MP.m.nc=d.nc||9;MP.m.nr=d.nr||8}else if(await whoP){await mr.set({c:MP.m.cells,nc:MP.m.nc,nr:MP.m.nr})}}catch(e){}
  try{const mh=db.doc("layout/histm"),s2=await mh.get();MP.m.hrf=mh;if(s2.exists&&Array.isArray(s2.data().h))MP.m.hist=clone(s2.data().h)}catch(e){}
+ try{const cr3=db.doc("layout/cabs"),c4=await cr3.get();cabref=cr3;if(c4.exists&&Array.isArray(c4.data().rows))CABS=clone(c4.data().rows)}catch(e){}
+ for(const c of CABS){if(c.id==="l"||c.id==="m")continue;try{const a=db.doc("layout/"+mapDoc(c.id)),b=db.doc("layout/"+histDoc(c.id)),sa=await a.get(),sb=await b.get(),m=MP[c.id]=MP[c.id]||newMapObj();m.lref=a;m.hrf=b;if(sa.exists&&sa.data().c){m.cells=clone(sa.data().c);m.nc=sa.data().nc||6;m.nr=sa.data().nr||6}if(sb.exists&&Array.isArray(sb.data().h))m.hist=clone(sb.data().h)}catch(e){}}
  try{const pr=db.doc("layout/prods"),p2=await pr.get();prref=pr;if(p2.exists&&Array.isArray(p2.data().c))PRODS=clone(p2.data().c)}catch(e){}
  try{const fr=db.doc("layout/fac"),f2=await fr.get();fref=fr;if(f2.exists&&f2.data().ov)FAC=clone(f2.data())}catch(e){}
  try{const sr=db.doc("layout/spec"),s3=await sr.get();sref=sr;if(s3.exists&&Array.isArray(s3.data().rows))SPEC=Object.assign({rows:[],factor:1,period:"每月"},clone(s3.data()))}catch(e){}
@@ -247,21 +252,21 @@ fillCat();
 function render(){
  $("list").className=canW?"":canQ?"qo":"ro";$("rob").hidden=canW;$("dtool").hidden=!canW;
  $("v_l").className=view==="l"?"on":"";$("v_m").className=view==="m"?"on":"";$("v_n").className=view==="n"?"on":"";$("v_p").className=view==="p"?"on":"";$("v_f").className=view==="f"?"on":"";$("v_s").className=view==="s"?"on":"";$("shv").hidden=view!=="s";document.querySelector(".bar").hidden=view==="s";
- const L=view==="l";$("tabs").hidden=!L;$("list").hidden=!L;$("add").hidden=!L||!canW;$("ti_imp").hidden=!L||!canW;$("sel_btn").hidden=!L||!canW;$("q_btn").hidden=!L;if(!L||!canW)selMode=false;renderBulk();$("pobox").hidden=!L;if(L)renderPO();$("facv").hidden=view!=="f";if(view!=="f"&&facFull){facFull=false;$("facv").classList.remove("full");document.body.style.overflow=""}$("prodv").hidden=view!=="p";$("map").hidden=view!=="m"&&view!=="n";$("mapctl").hidden=$("map").hidden;document.querySelector("main").classList.toggle("wide",view==="m"||view==="n"||view==="f"||view==="s");if($("map").hidden&&mapFull)mapExit();$("mtool").hidden=(view!=="m"&&view!=="n")||!canW;
+ const L=view==="l";$("tabs").hidden=!L;$("list").hidden=!L;$("add").hidden=!L||!canW;$("ti_imp").hidden=!L||!canW;$("sel_btn").hidden=!L||!canW;$("q_btn").hidden=!L;if(!L||!canW)selMode=false;renderBulk();$("pobox").hidden=!L;if(L)renderPO();$("facv").hidden=view!=="f";if(view!=="f"&&facFull){facFull=false;$("facv").classList.remove("full");document.body.style.overflow=""}$("prodv").hidden=view!=="p";$("map").hidden=view!=="m"&&view!=="n";$("mapctl").hidden=$("map").hidden;document.querySelector("main").classList.toggle("wide",view==="m"||view==="n"||view==="f"||view==="s");if($("map").hidden&&mapFull)mapExit();$("mtool").hidden=(view!=="m"&&view!=="n")||!canW;$("cabbar").hidden=view!=="m";if(view==="m")renderCabBar();
  if(view==="s"){renderShift();return}
  if(view==="f"){renderFac();return}
  if(view==="p"){renderProdView();return}
  if(!L){renderMap();return}
  $("tabs").innerHTML=["全部",...CATS].map(c=>`<button class="${c===cat?"on":""}" data-c="${c}">${c}</button>`).join("")+(canW?'<button data-c="__edit">⚙ 編輯分類</button>':"");
  const k=$("q").value.trim().toLowerCase();
- const rs=items.filter(i=>(cat==="全部"||i.cat===cat)&&(!k||[i.model,i.pn,i.brand,i.spec,i.note,i.loc,itemLoc(i).t,(i.prods||[]).join(" "),i.prod,locs(i).join(" ")].join(" ").toLowerCase().includes(k)));
+ const rs=items.filter(i=>(cat==="全部"||i.cat===cat)&&(!k||[i.model,i.pn,i.brand,i.spec,i.note,i.loc,itemLoc(i).t,(i.prods||[]).join(" "),i.prod,locs(i).map(k=>k.split(":")[1]).join(" ")].join(" ").toLowerCase().includes(k)));
  VIS=rs.map(i=>i.id);$("list").innerHTML=rs.length?rs.map(i=>{const dq=pq[i.id]!==undefined,q=dq?pq[i.id]:i.qty,low=q<=i.min,high=i.max>0&&q>i.max,st=stats(i),sp0=ps[i.id],sv0=sp0&&sp0.reorder!==undefined?sp0.reorder:((i.ov||{}).reorder!==undefined?i.ov.reorder:(st?st.reorder:null)),sug=sv0===null?"最低庫存 "+(i.min||0):"建議庫存 "+Math.round(sv0),il=itemLoc(i);return `<div class="card"><div class="top"><div style="display:flex;gap:10px;min-width:0;align-items:center">${selMode?`<input type="checkbox" class="selc" data-sel="${i.id}"${selSet.has(i.id)?" checked":""}>`:""}${imgSrc(i)?`<img class="th" alt="" src="${imgSrc(i)}" data-a="zoom" data-i="${i.id}">`:""}<div class="m">${esc(i.model)}</div></div><span class="tag">${i.cat}</span></div>
  <div class="s" style="font-weight:600;color:var(--fg);margin-top:2px">品號：${esc(i.pn)||"-"}　📍 儲位號碼：${il.t?esc(il.t):"-"}${il.t&&!il.own?' <span class="tag">依產品資料</span>':""}</div>
  <div class="row"><div class="q"><button data-a="dec" data-i="${i.id}">−</button><b class="${low?"low":high?"high":""}">${q}</b><button data-a="inc" data-i="${i.id}">＋</button>${low?'<span class="tag low">庫存偏低</span>':""}${high?'<span class="tag high">庫存偏高</span>':""}</div><span class="tag sug">${sug}</span>${poChip(i)}</div>
  ${dq||okId===i.id?`<div class="row">${dq?`<span class="tag" style="color:#d97706;border-color:#d97706">未儲存（原 ${i.qty}）</span><button class="p" data-a="sv" data-i="${i.id}">儲存</button><button data-a="rv" data-i="${i.id}">取消</button>`:""}${okId===i.id?'<span class="tag" style="color:#16a34a;border-color:#16a34a">✓ 已儲存</span>':""}</div>`:""}
  <details class="more" data-did="${i.id}"${lopen.has(String(i.id))||pend===i.id||ps[i.id]?" open":""}><summary>詳細資料與操作</summary>
  <div class="s">${esc([i.brand,i.spec].filter(Boolean).join(" · "))}</div>
- <div class="s">${i.note?esc(i.note)+" ":""}${locs(i).map(k=>`<button class="tag" data-a="goto" data-k="${k}" style="cursor:pointer">${k.startsWith("銑:")?"銑床 "+k.slice(2):"車床 "+k}</button>`).join(" ")}</div>
+ <div class="s">${i.note?esc(i.note)+" ":""}${locs(i).map(k=>`<button class="tag" data-a="goto" data-k="${k}" style="cursor:pointer">${esc(cabName(k.split(":")[0]))} ${esc(k.split(":")[1])}</button>`).join(" ")}</div>
  ${compatLine(i)}${poLines(i)}
  ${(i.prods&&i.prods.length)||i.prod?`<div class="s">加工過：${esc([...(i.prods||[]),i.prod].filter(Boolean).join("、"))}</div>`:""}
  ${(st||i.ov)?statLine(i,st):""}
@@ -297,7 +302,7 @@ $("list").onchange=e=>{const f=e.target.dataset.f;if(!f||!canW)return;const it=i
  const n=Math.max(0,+e.target.value||0);ps[it.id]=ps[it.id]||{};ps[it.id][f]=Math.round(n);render()};
 $("list").onclick=e=>{
  const a=e.target.dataset.a,id=+e.target.dataset.i;if(!a)return;
- if(a==="goto"){const gk=e.target.dataset.k;if(gk.startsWith("銑:")){swapMap("m");view="n";focusK=gk.slice(2)}else{swapMap("l");view="m";focusK=gk}$("q").value="";render();return}
+ if(a==="goto"){const gk=e.target.dataset.k,p=gk.indexOf(":"),cid=gk.slice(0,p);swapMap(cabList().some(c=>c.id===cid)?cid:cabList()[0].id);view="m";focusK=gk.slice(p+1);$("q").value="";render();return}
  if(!canW&&a!=="stat"&&a!=="zoom"&&a!=="log"&&!(canQ&&(a==="inc"||a==="dec"||a==="sv"||a==="rv")))return;
  if(a!=="del"&&pend!==null){pend=null}
  const it=items.find(i=>i.id===id);
@@ -391,7 +396,7 @@ function persistPics(){if(dbh)return;try{localStorage.setItem("toolpics",JSON.st
 let impData=null;
 $("d_exp").onclick=async()=>{
  const used={};items.forEach(i=>{if(pics[i.id])used[i.id]=pics[i.id]});
- const L0=getMap("l"),M0=getMap("m");const data=JSON.stringify({app:"tool-manager",v:2,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cats:CATS,prods:PRODS,fac:FAC,spec:SPEC,nav:NAVN,po:PO,ph:PH,sh:SH});
+ const L0=getMap("l"),M0=getMap("m");const data=JSON.stringify({app:"tool-manager",v:2,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cabs:cabList(),cabd:cabExport(),cats:CATS,prods:PRODS,fac:FAC,spec:SPEC,nav:NAVN,po:PO,ph:PH,sh:SH});
  const fn="刀具管理備份_"+new Date().toISOString().slice(0,10)+".json";$("dmsg").textContent="";
  try{const dl=window.claude?await claude.use("downloads"):null;
   if(dl){await dl.save({filename:fn,data});$("dmsg").textContent="✓ 已匯出 "+items.length+" 筆刀具";return}
@@ -400,7 +405,7 @@ $("d_exp").onclick=async()=>{
 };
 function buildHtml(){
  const used={};items.forEach(i=>{if(pics[i.id])used[i.id]=pics[i.id]});
- const L0=getMap("l"),M0=getMap("m");const payload={app:"tool-manager",version:APP_VERSION,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cats:CATS,prods:PRODS,fac:FAC,spec:SPEC,nav:NAVN,po:PO,ph:PH,sh:SH};
+ const L0=getMap("l"),M0=getMap("m");const payload={app:"tool-manager",version:APP_VERSION,t:Date.now(),items,logs,cells:L0.cells,nc:L0.nc,nr:L0.nr,pics:used,hist:L0.hist,mill:{cells:M0.cells,nc:M0.nc,nr:M0.nr,hist:M0.hist},cabs:cabList(),cabd:cabExport(),cats:CATS,prods:PRODS,fac:FAC,spec:SPEC,nav:NAVN,po:PO,ph:PH,sh:SH};
  const j=JSON.stringify(payload).replace(/</g,"\\u003c").replace(/\u2028/g,"\\u2028").replace(/\u2029/g,"\\u2029");
  const css=document.getElementById("app-style").textContent,js=document.getElementById("app-js").textContent;
  const html='<!doctype html>\n<html lang="zh-Hant"><head><meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<title>刀具管理</title>\n<style id="app-style">'+css+'</style></head><body>'+MAIN_HTML+'\n<script id="embedded-data" type="application/json">'+j+'<\/script>\n<script id="app-js">'+js+'<\/script>\n</body></html>';
@@ -429,6 +434,7 @@ $("d_ok").onclick=async()=>{const d=impData;if(!d||!canW)return;impData=null;$("
  pend=null;pq={};ps={};
  save();saveCells();saveHist();Object.keys(logs).forEach(saveLog);
  if(d.mill&&d.mill.cells){MP.m.cells=d.mill.cells;MP.m.nc=d.mill.nc||9;MP.m.nr=d.mill.nr||8;MP.m.hist=d.mill.hist||[];swapMap("m");saveCells();saveHist();swapMap("l")}
+ cabImport(d);
  if(Array.isArray(d.cats)&&d.cats.length){CATS=d.cats;saveCats()}
  if(Array.isArray(d.prods)){PRODS=d.prods;saveProds()}
  if(d.fac&&d.fac.ov){FAC=d.fac;saveFac()}
@@ -454,9 +460,19 @@ let NC=9,NR=8,COLS=[];
 const setGrid=(c,r)=>{NC=Math.max(1,Math.min(52,+c||9));NR=Math.max(1,Math.min(60,+r||8));COLS=Array.from({length:NC},(_,i)=>cn(i))};
 setGrid(9,8);
 let view="l",focusK=null,cells=null,ck=null,lref=null,cto=null,curMap="l";
+/* 模具室：櫃的清單與每個櫃的資料位置（原車床圖＝A櫃 id「l」、原銑床圖＝B櫃 id「m」，其他新增的櫃用自己的 id） */
+var CABS=[],cabref=null,lastCABS=new Map(),cabDel=null,cabMsg="";
+function newMapObj(){return{cells:{},nc:6,nr:6,hist:[],lref:null,hrf:null}}
+function mapSuf(id){return id==="l"?"":"_"+id}
+function cabList(){return(CABS.length?CABS:[{id:"l",name:"A櫃",order:1},{id:"m",name:"B櫃",order:2}]).slice().sort((a,b)=>(a.order||0)-(b.order||0))}
+function cabName(id){const c=cabList().find(x=>x.id===id);return c?c.name:id}
+function mapDoc(id){return id==="l"?"main":id==="m"?"mill":"cab_"+id}
+function histDoc(id){return id==="l"?"hist":id==="m"?"histm":"cabh_"+id}
+function mapKey(id){return id==="l"?"layout":id==="m"?"layout_m":"cab_"+id}
+function histKey(id){return id==="l"?"hist":id==="m"?"hist_m":"cabh_"+id}
 const TM={},MP={m:{cells:{},nc:9,nr:8,hist:[],lref:null,hrf:null}};
-const getMap=k=>curMap===k?{cells,nc:NC,nr:NR,hist}:MP[k];
-function swapMap(to){if(to===curMap)return;MP[curMap]={cells,nc:NC,nr:NR,hist,lref,hrf};const t=MP[to];cells=t.cells;setGrid(t.nc,t.nr);hist=t.hist;lref=t.lref;hrf=t.hrf;curMap=to}
+const getMap=k=>curMap===k?{cells,nc:NC,nr:NR,hist}:(MP[k]||(MP[k]=newMapObj()));
+function swapMap(to){if(to===curMap)return;MP[curMap]={cells,nc:NC,nr:NR,hist,lref,hrf};const t=MP[to]||(MP[to]=newMapObj());cells=t.cells;setGrid(t.nc,t.nr);hist=t.hist;lref=t.lref;hrf=t.hrf;curMap=to}
 const SEED=[
 ["PCHPR S25-34","S16Q-SDUCR11","GEHR2525M02-10L","SVQCR-2525M16","SVKCR-2525M11|KGMR-2525M-3T10L","15.5EDX-4D-25|KGBSR2525M22NS(HG)","EGEHR-25B-3D-20|C10M-SDUCR07-13","",""],
 ["ETFNL-2525M16|ETQNR-2525M16","ETJNL2525M16|ETJNR2525M16","EDGTR-25B-2D-14","SVUCR-2525M16|EDJNR-2525M15","H08K-STUPR09-10|H08K-SCLCR06-09","SS16-DRA140M-8|TID130F16-5","S25R-ETUNL16","C04G-SCLCR03-05|C06J-SCLCR04-07|C06J-TUBR06-07","EVJNR-2020K16"],
@@ -472,8 +488,8 @@ if(!cells){cells={};SEED.forEach((row,ri)=>row.forEach((v,ci)=>{if(v)cells[COLS[
 const nz=v=>String(v||"").toUpperCase().replace(/[\s\-_]/g,"");
 const lines=k=>(cells[k]||"").split("\n").map(x=>x.trim()).filter(Boolean);
 function locs(it){const n=nz(it.model),o=[];if(!n)return o;
- for(const [m,pre] of [["l",""],["m","銑:"]]){const g=getMap(m);for(let c=0;c<g.nc;c++)for(let r=1;r<=g.nr;r++){const k=cn(c)+r;if((g.cells[k]||"").split("\n").some(x=>nz(x)===n))o.push(pre+k)}}return o}
-function saveCells(){touch();const sf=curMap==="m"?"_m":"";try{localStorage.setItem("toolcells"+sf,JSON.stringify(cells));localStorage.setItem("toolgrid"+sf,JSON.stringify({nc:NC,nr:NR}))}catch(e){}
+ for(const c0 of cabList()){const g=getMap(c0.id);for(let c=0;c<g.nc;c++)for(let r=1;r<=g.nr;r++){const k=cn(c)+r;if((g.cells[k]||"").split("\n").some(x=>nz(x)===n))o.push(c0.id+":"+k)}}return o}
+function saveCells(){touch();const sf=mapSuf(curMap);try{localStorage.setItem("toolcells"+sf,JSON.stringify(cells));localStorage.setItem("toolgrid"+sf,JSON.stringify({nc:NC,nr:NR}))}catch(e){}
  if(lref){const c0=cells,n0=NC,r0=NR,l0=lref,k="c"+curMap;clearTimeout(TM[k]);TM[k]=setTimeout(()=>l0.set({c:c0,nc:n0,nr:r0}).catch(()=>{}),400)}}
 function renderMap(){
  const q=nz($("q").value);let h='<div class="mg'+(q||focusK?" f":"")+'" style="grid-template-columns:24px repeat('+NC+',minmax(104px,1fr));min-width:'+(24+NC*108)+'px"><div></div>'+COLS.map(c=>`<div class="mh">${c}</div>`).join("");
@@ -482,7 +498,7 @@ function renderMap(){
  const el=$("map").querySelector(".hit");if(el)el.scrollIntoView({block:"nearest",inline:"center"})
 }
 $("v_l").onclick=()=>{view="l";render()};
-$("v_m").onclick=()=>{swapMap("l");view="m";focusK=null;render()};
+$("v_m").onclick=()=>{swapMap(cabList().some(c=>c.id===curMap)?curMap:cabList()[0].id);view="m";focusK=null;render()};
 $("v_n").onclick=()=>{swapMap("m");view="n";focusK=null;render()};
 $("map").onclick=e=>{const c=e.target.closest(".c");if(!c)return;ck=c.dataset.k;$("ct_").textContent=ck+" 格";$("c_t").value=lines(ck).join("\n");$("c_t").readOnly=!canW;$("c_s").hidden=!canW;$("cdlg").showModal()};
 $("mtool").onclick=e=>{const g=e.target.dataset.g;if(!g||!canW)return;let msg="";
@@ -500,8 +516,10 @@ try{const r=localStorage.getItem("toolhist");if(SEED0&&Array.isArray(SEED0.hist)
 const clone=o=>JSON.parse(JSON.stringify(o));
 try{const c=localStorage.getItem("toolcells_m"),g=JSON.parse(localStorage.getItem("toolgrid_m")||"null"),h=localStorage.getItem("toolhist_m");if(c)MP.m.cells=JSON.parse(c)||{};if(g){MP.m.nc=g.nc;MP.m.nr=g.nr}if(h)MP.m.hist=JSON.parse(h)||[]}catch(e){}
 if(SEED0&&SEED0.mill&&SEED0.mill.cells)MP.m={cells:clone(SEED0.mill.cells),nc:SEED0.mill.nc||9,nr:SEED0.mill.nr||8,hist:clone(SEED0.mill.hist||[]),lref:null,hrf:null};
+try{const r=JSON.parse(localStorage.getItem("toolcabs")||"null");if(r&&Array.isArray(r.rows))CABS=r.rows}catch(e){}
+CABS.forEach(c=>{if(c.id==="l"||c.id==="m")return;try{const m=MP[c.id]=MP[c.id]||newMapObj(),cc=localStorage.getItem("toolcells_"+c.id),g=JSON.parse(localStorage.getItem("toolgrid_"+c.id)||"null"),h=localStorage.getItem("toolhist_"+c.id);if(cc)m.cells=JSON.parse(cc)||{};if(g){m.nc=g.nc||6;m.nr=g.nr||6}if(h)m.hist=JSON.parse(h)||[]}catch(e){}});
 function saveHist(){while(hist.length>20||(hist.length>1&&JSON.stringify(hist).length>200000))hist.shift();
- touch();try{localStorage.setItem("toolhist"+(curMap==="m"?"_m":""),JSON.stringify(hist))}catch(e){}
+ touch();try{localStorage.setItem("toolhist"+mapSuf(curMap),JSON.stringify(hist))}catch(e){}
  if(hrf){const h0=hist,r0=hrf,k="h"+curMap;clearTimeout(TM[k]);TM[k]=setTimeout(()=>r0.set({h:h0}).catch(()=>{}),500)}}
 function snap(n){hist.push({t:Date.now(),c:clone(cells),nc:NC,nr:NR,n});saveHist()}
 function applySnap(h){cells=clone(h.c);setGrid(h.nc,h.nr);saveCells();render()}
@@ -535,7 +553,7 @@ async function tok(){if(!SES)throw new Error("未登入");if(Date.now()>SES.exp)
 async function api(path,o){o=o||{};const r=await fetch(SB_URL+"/rest/v1/"+path,{method:o.method||"GET",headers:Object.assign(H0(),{Authorization:"Bearer "+await tok()},o.prefer?{Prefer:o.prefer}:{}),body:o.body===undefined?undefined:JSON.stringify(o.body)});const t=await r.text();if(!r.ok)throw new Error(r.status+" "+t.slice(0,120));return t?JSON.parse(t):null}
 const setSyn=(t,bad)=>{$("syn").textContent=t;$("syn").style.color=bad?"var(--warn)":"var(--mut)"};
 function showLogin(m){$("auth").hidden=false;try{if(!$("a_id").value)$("a_id").value=localStorage.getItem("toolid")||""}catch(e){}$("a_m").textContent=(m||"")+"（程式版本 "+APP_VERSION+"）";pingCloud()}
-function cacheLocal(){try{localStorage.setItem("tools",JSON.stringify(items));localStorage.setItem("toollogs",JSON.stringify(logs));const Lm=getMap("l"),Mm=getMap("m");localStorage.setItem("toolcells",JSON.stringify(Lm.cells));localStorage.setItem("toolgrid",JSON.stringify({nc:Lm.nc,nr:Lm.nr}));localStorage.setItem("toolhist",JSON.stringify(Lm.hist));localStorage.setItem("toolcells_m",JSON.stringify(Mm.cells));localStorage.setItem("toolgrid_m",JSON.stringify({nc:Mm.nc,nr:Mm.nr}));localStorage.setItem("toolhist_m",JSON.stringify(Mm.hist));localStorage.setItem("toolcats",JSON.stringify(CATS));localStorage.setItem("toolprods",JSON.stringify(PRODS));localStorage.setItem("toolfac",JSON.stringify(FAC));localStorage.setItem("toolspec",JSON.stringify(SPEC));localStorage.setItem("toolnav",JSON.stringify(NAVN));localStorage.setItem("toolpo",JSON.stringify({rows:PO}));localStorage.setItem("toolph",JSON.stringify({rows:PH}));localStorage.setItem("toolsh",JSON.stringify({rows:SH}));localStorage.setItem("toolsts",String(Date.now()))}catch(e){}}
+function cacheLocal(){try{localStorage.setItem("tools",JSON.stringify(items));localStorage.setItem("toollogs",JSON.stringify(logs));const Lm=getMap("l"),Mm=getMap("m");localStorage.setItem("toolcells",JSON.stringify(Lm.cells));localStorage.setItem("toolgrid",JSON.stringify({nc:Lm.nc,nr:Lm.nr}));localStorage.setItem("toolhist",JSON.stringify(Lm.hist));localStorage.setItem("toolcells_m",JSON.stringify(Mm.cells));localStorage.setItem("toolgrid_m",JSON.stringify({nc:Mm.nc,nr:Mm.nr}));localStorage.setItem("toolhist_m",JSON.stringify(Mm.hist));localStorage.setItem("toolcats",JSON.stringify(CATS));localStorage.setItem("toolprods",JSON.stringify(PRODS));localStorage.setItem("toolfac",JSON.stringify(FAC));localStorage.setItem("toolspec",JSON.stringify(SPEC));localStorage.setItem("toolnav",JSON.stringify(NAVN));localStorage.setItem("toolpo",JSON.stringify({rows:PO}));localStorage.setItem("toolph",JSON.stringify({rows:PH}));localStorage.setItem("toolcabs",JSON.stringify({rows:CABS}));localStorage.setItem("toolsh",JSON.stringify({rows:SH}));localStorage.setItem("toolsts",String(Date.now()))}catch(e){}}
 const UPS="resolution=merge-duplicates,return=minimal";
 async function syncTools(list){
  if(canQ&&!canW){for(const it of list){const old=lastT.get(it.id);if(!old)continue;const d=(+it.qty||0)-(+JSON.parse(old).qty||0);if(!d)continue;
@@ -570,8 +588,8 @@ async function cput(a,b,v){
    let bk=null;try{const r=await api("tool_logs?select=data&tool_id=eq."+id);bk=keyC((r&&r[0]?r[0].data:[]).map(x=>JSON.stringify(x)))}catch(e){break}
    let ok=true;delta.forEach((dd,k)=>{const sv=sC.get(k)||0,bv=bk.get(k)||0;if(dd>0&&bv<sv+dd)ok=false;if(dd<0&&bv>Math.max(0,sv+dd))ok=false});if(ok)break}
   lastL.set(id,JSON.parse(JSON.stringify(mg)));if(JSON.stringify(mg)!==JSON.stringify(logs[id])){logs[id]=mg;render()}return}
- if(a==="layout"&&(b==="po"||b==="ph"||b==="shift")){const out=await mergeRowsDoc(b,v.rows,b==="po"?lastPO:b==="ph"?lastPH:lastSH),nm=new Map(out.map(x=>[x.id,cs(x)]));if(b==="po"){lastPO=nm;if(cs(out)!==cs(PO)){PO=out;render()}}else if(b==="ph"){lastPH=nm;if(cs(out)!==cs(PH)){PH=out;render()}}else{lastSH=nm;if(cs(out)!==cs(SH)){SH=out;render()}}return}
-  if(a==="layout")return api("app_settings?on_conflict=key",{method:"POST",prefer:UPS,body:{key:{main:"layout",hist:"hist",mill:"layout_m",histm:"hist_m",cats:"cats",prods:"prods",fac:"factory",spec:"prodspec",nav:"nav",po:"po",ph:"ph",shift:"shift"}[b],value:v,updated_at:now}})}
+ if(a==="layout"&&(b==="po"||b==="ph"||b==="shift"||b==="cabs")){const out=await mergeRowsDoc(b,v.rows,b==="po"?lastPO:b==="ph"?lastPH:b==="shift"?lastSH:lastCABS),nm=new Map(out.map(x=>[x.id,cs(x)]));if(b==="po"){lastPO=nm;if(cs(out)!==cs(PO)){PO=out;render()}}else if(b==="ph"){lastPH=nm;if(cs(out)!==cs(PH)){PH=out;render()}}else if(b==="shift"){lastSH=nm;if(cs(out)!==cs(SH)){SH=out;render()}}else{lastCABS=nm;if(cs(out)!==cs(CABS)){CABS=out;render()}}return}
+  if(a==="layout")return api("app_settings?on_conflict=key",{method:"POST",prefer:UPS,body:{key:{main:"layout",hist:"hist",mill:"layout_m",histm:"hist_m",cats:"cats",prods:"prods",fac:"factory",spec:"prodspec",nav:"nav",po:"po",ph:"ph",shift:"shift",cabs:"cabs"}[b]||b,value:v,updated_at:now}})}
 const cdb={doc(path){const[a,b]=path.split("/");return{
  async set(v){if(a==="photos"){if(canW)await api("tool_photos?on_conflict=tool_id",{method:"POST",prefer:UPS,body:{tool_id:+b,data:v.d,updated_at:new Date().toISOString()}});return}if(a==="logs"&&!canW)return;try{await cput(a,b,v);setSyn("☁ 已同步 "+new Date().toLocaleTimeString("zh-TW",{hour12:false}))}catch(e){setSyn("⚠ 雲端儲存失敗："+e.message,1);$("dmsg").textContent="⚠ 雲端儲存失敗："+e.message}},
  async delete(){if(!canW)return;if(a==="logs")try{await api("tool_logs?tool_id=eq."+b,{method:"DELETE"})}catch(e){}if(a==="photos")try{await api("tool_photos?tool_id=eq."+b,{method:"DELETE"})}catch(e){}}}}};
@@ -591,6 +609,8 @@ async function cloudLoad(){
  if(S.layout&&S.layout.c){cells=S.layout.c;if(S.layout.nc&&S.layout.nr)setGrid(S.layout.nc,S.layout.nr)}
  if(S.hist&&Array.isArray(S.hist.h))hist=S.hist.h;
  swapMap("m");const LM=S.layout_m||{};cells=LM.c||{};setGrid(LM.nc||9,LM.nr||8);hist=S.hist_m&&Array.isArray(S.hist_m.h)?S.hist_m.h:[];
+  if(S.cabs&&Array.isArray(S.cabs.rows)){CABS=S.cabs.rows;lastCABS=new Map(CABS.map(x=>[x.id,cs(x)]))}
+ cabList().forEach(c=>{if(c.id==="l"||c.id==="m")return;swapMap(c.id);cabBind(c.id);const D=S[mapKey(c.id)]||{},H=S[histKey(c.id)];cells=D.c||{};setGrid(D.nc||6,D.nr||6);hist=H&&Array.isArray(H.h)?H.h:[]});
  swapMap(keep);
  if(S.cats&&Array.isArray(S.cats.c)&&S.cats.c.length){CATS=S.cats.c;fillCat()}
  if(S.prods&&Array.isArray(S.prods.c))PRODS=S.prods.c;
@@ -607,7 +627,7 @@ async function cloudStart(){
   canW=role==="admin";canQ=role==="user";SBON=true;$("auth").hidden=true;if(!SES.eid)await needEid();setMyEid();
   $("who").hidden=false;$("who_t").textContent=whoText();$("adm").hidden=!canW;
   $("rob").textContent=canW?"":"👁 一般使用者：只能加減刀具數量（按 ＋／－ 後請按儲存）";
-  dbh=cdb;ref=cdb.doc("inventory/main");lref=cdb.doc("layout/main");hrf=cdb.doc("layout/hist");MP.m.lref=cdb.doc("layout/mill");MP.m.hrf=cdb.doc("layout/histm");cref=cdb.doc("layout/cats");prref=cdb.doc("layout/prods");fref=cdb.doc("layout/fac");sref=cdb.doc("layout/spec");nref=cdb.doc("layout/nav");poref=cdb.doc("layout/po");phref=cdb.doc("layout/ph");shref=cdb.doc("layout/shift");
+  dbh=cdb;ref=cdb.doc("inventory/main");lref=cdb.doc("layout/main");hrf=cdb.doc("layout/hist");MP.m.lref=cdb.doc("layout/mill");MP.m.hrf=cdb.doc("layout/histm");cref=cdb.doc("layout/cats");prref=cdb.doc("layout/prods");fref=cdb.doc("layout/fac");sref=cdb.doc("layout/spec");nref=cdb.doc("layout/nav");poref=cdb.doc("layout/po");phref=cdb.doc("layout/ph");shref=cdb.doc("layout/shift");cabref=cdb.doc("layout/cabs");
   await cloudLoad()}catch(e){canW=false;canQ=false;SBON=false;setSyn("⚠ 無法連線雲端："+e.message,1);$("who").hidden=false;render();showLogin("登入後無法載入資料："+e.message)}}
 async function loginAuth(){const email=$("a_e").value.replace(/[\s\u200b]/g,"").toLowerCase(),pw=$("a_p").value;try{return await authP("token?grant_type=password",{email,password:pw})}catch(e){if(pw!==pw.trim()&&/invalid/i.test(e.message))return await authP("token?grant_type=password",{email,password:pw.trim()});throw e}}
 const loginHint=e=>{const m=String(e&&e.message||e);if(/failed to fetch|networkerror|load failed|network request/i.test(m))return "連不上雲端（"+m+"）。請確認手機網路，或換 Wi‑Fi／行動網路再試。";if(/invalid login/i.test(m))return "Email 或密碼不正確。手機請確認 Email 沒有被自動大寫或多空白，密碼可按「顯示密碼」檢查。";if(/not confirmed/i.test(m))return "這個 Email 還沒確認，請管理員在 Supabase 確認帳號。";return m};
@@ -755,7 +775,7 @@ const TH=[
 ["日期","วันที่"],["⚙ 自動分配","⚙ จัดอัตโนมัติ"],["清除這一班的分配","ล้างการจัดของกะนี้"],["📍 在現場機台圖上看","📍 ดูบนผังเครื่องจักรหน้างาน"],["需要操作的機台 ","เครื่องจักรที่ต้องดูแล "],[" 台（停機 "," เครื่อง (หยุดเครื่อง "],[" 台），當班 "," เครื่อง) เข้ากะ "],[" 人。每人同時最多 5 台，至少需要 "," คน แต่ละคนดูแลได้ไม่เกิน 5 เครื่อง ต้องการอย่างน้อย "],[" 人。已分配 "," คน จัดแล้ว "],[" 台，"," เครื่อง "],["還沒分配 ","ยังไม่ได้จัด "],[" 台。"," เครื่อง"],["這一班沒有人上班，請先到「班表」排人","กะนี้ไม่มีคนทำงาน โปรดไปจัดคนที่「ตารางกะ」ก่อน"],["會加工：","ทำได้: "],["（還沒設定）","(ยังไม่ได้ตั้งค่า)"],["還沒有分配機台","ยังไม่ได้จัดเครื่องจักร"],["＋ 加一台機台…","＋ เพิ่มเครื่องจักรหนึ่งเครื่อง…"],["已達台數上限","ถึงจำนวนเครื่องสูงสุดแล้ว"],["沒有可以指派的機台","ไม่มีเครื่องจักรที่มอบหมายได้"],["⚠ 不會加工","⚠ ทำไม่ได้"],["還沒分配的機台（","เครื่องจักรที่ยังไม่ได้จัด ("],["機台","เครื่องจักร"],["工件","ชิ้นงาน"],["誰會做（當班）","ใครทำได้ (ที่เข้ากะ)"],["誰會做","ใครทำได้"],["當班沒有人會做","ไม่มีคนในกะที่ทำได้"],["指派給…","มอบหมายให้…"],["停機","หยุดเครื่อง"],["停機的機台（","เครื่องจักรที่หยุด ("],["恢復","เปิดใช้งาน"],
 ["＋ 新增人員","＋ เพิ่มพนักงาน"],["一次新增多人：一行一個，格式「姓名,工號」","เพิ่มหลายคนพร้อมกัน: หนึ่งบรรทัดต่อหนึ่งคน รูปแบบ「ชื่อ,รหัสพนักงาน」"],["批次新增","เพิ่มเป็นกลุ่ม"],["姓名","ชื่อ"],["會加工的工件","ชิ้นงานที่ทำได้"],["台數上限","จำนวนเครื่องสูงสุด"],["停用","ปิดใช้งาน"],["還沒有人員","ยังไม่มีพนักงาน"],["每個工件有幾個人會做","แต่ละชิ้นงานมีกี่คนที่ทำได้"],["還沒有工件","ยังไม่มีชิ้นงาน"],["編輯人員","แก้ไขพนักงาน"],["新增人員","เพิ่มพนักงาน"],["同時最多操作幾台（1～5）","ดูแลพร้อมกันได้สูงสุดกี่เครื่อง (1-5)"],["在職（可排班）","ทำงานอยู่ (จัดกะได้)"],["會加工的工件（勾選）","ชิ้นงานที่ทำได้ (ติ๊กเลือก)"],["搜尋工件…","ค้นหาชิ้นงาน…"],["全選顯示的","เลือกที่แสดงทั้งหมด"],["全部取消","ยกเลิกทั้งหมด"],[" 個工件"," ชิ้นงาน"],["請填姓名","โปรดกรอกชื่อ"],["還沒有工件，請先到「加工產品」或「現場機台」建立","ยังไม่มีชิ้นงาน โปรดสร้างที่「ผลิตภัณฑ์」หรือ「เครื่องจักรหน้างาน」ก่อน"],
 ["班別是排班時可以選的上班時段。","กะงานคือช่วงเวลาทำงานที่เลือกได้เมื่อจัดตารางกะ"],["＋ 新增班別","＋ เพิ่มกะงาน"],["名稱","ชื่อ"],["開始","เริ่ม"],["結束","สิ้นสุด"],["新班別","กะใหม่"],["早班","กะเช้า"],
-["✓ 已分配 ","✓ จัดแล้ว "],["；有 ","; มี "],[" 台沒有人能接（當班沒有人會加工，或已達台數上限）："," เครื่องไม่มีคนรับ (ไม่มีคนในกะที่ทำได้ หรือถึงจำนวนสูงสุดแล้ว): "],["要清除 ","ต้องการล้าง "],[" 這一班所有的機台分配嗎？"," การจัดเครื่องจักรทั้งหมดของกะนี้หรือไม่"],[" 已達台數上限"," ถึงจำนวนเครื่องสูงสุดแล้ว"],["👷 顯示 ","👷 แสดงผู้ดูแล "],[" 的操作人"," "],["回到排班","กลับไปจัดตารางกะ"],["關閉顯示","ปิดการแสดงผล"],["排班資料","ข้อมูลตารางกะ"],["刪除人員","ลบพนักงาน"],["複製班表前","ก่อนคัดลอกตารางกะ"],["（一）","(จ.)"],["（二）","(อ.)"],["（三）","(พ.)"],["（四）","(พฤ.)"],["（五）","(ศ.)"],["（六）","(ส.)"],["（日）","(อา.)"],[" 台"," เครื่อง"],[" 人"," คน"],["縮小","ย่อ"],["放大","ขยาย"],["全圖","ทั้งผัง"],["結束全螢幕","ออกจากเต็มจอ"],["全螢幕","เต็มจอ"],["製程別","ขั้นตอนการผลิต"],["刀壽","อายุมีด"],["機台號","เลขเครื่อง"],["刀號","หมายเลขมีด"],["品名","ชื่อสินค้า"],["有效長度","ความยาวที่ใช้งาน"],["標準供變數（刀壽）","อายุใช้งานมาตรฐาน (อายุมีด)"],["標準供變數","อายุใช้งานมาตรฐาน"],["匯入前確認","ยืนยันก่อนนำเข้า"],["找到 ","พบ "],[" 個產品、"," ผลิตภัณฑ์ "],[" 列刀具資料（每一列＝產品的一把刀具）。"," แถวข้อมูลเครื่องมือ (1 แถว = เครื่องมือ 1 ชิ้นของผลิตภัณฑ์)"],["…還有 ","…ยังมีอีก "],["選擇刀桿型號（可複選）","เลือกรุ่นด้ามมีด (เลือกได้หลายรายการ)"],["已選","ที่เลือกแล้ว"],["ISO 相容建議（刀桿清單內）","คำแนะนำที่เข้ากันได้ตาม ISO (ในรายการด้ามมีด)"],["其他刀桿","ด้ามมีดอื่น ๆ"],["新增刀桿型號（可貼多筆，逗號或換行分開）","เพิ่มรุ่นด้ามมีด (วางได้หลายรายการ คั่นด้วยจุลภาคหรือขึ้นบรรทัดใหม่)"],["＋ 新增","เพิ่ม"],["選擇","เลือก"],["⬆ 匯入 Excel（刀具壽命管理表）","นำเข้า Excel (ตารางอายุการใช้มีด)"],["刀具壽命資料（","ข้อมูลอายุการใช้มีด ("],["已在表格最上面新增一列，請直接填寫","เพิ่มแถวไว้บนสุดของตารางแล้ว กรอกได้เลย"],["請先匯入刀具壽命管理表（Excel），或在下方手動新增一列","โปรดนำเข้าตารางอายุการใช้มีด (Excel) หรือเพิ่มแถวด้วยตนเองด้านล่าง"],["這份 Excel 不是刀具壽命管理表的格式，請手動對應欄位（共 ","Excel นี้ไม่ใช่รูปแบบตารางอายุการใช้มีด โปรดจับคู่คอลัมน์เอง (ทั้งหมด "],["已匯入 ","นำเข้าแล้ว "],["列刀具資料，新增 "," แถวข้อมูลเครื่องมือ เพิ่ม "],["標準供變數＝刀壽（每個刀口可加工幾件）。需求刀數 = 預計產量 ÷ 刀壽（無條件進位）。建議叫貨 = 需求刀數 × 安全係數 + 最低庫存 − 目前庫存，不足才叫。可裝刀桿依 Excel 的刀桿型號，再加上 ISO 型號編碼判斷（僅供參考，請以實物確認）。","อายุใช้งานมาตรฐาน = อายุมีด (ผลิตได้กี่ชิ้นต่อคมตัด) จำนวนที่ต้องใช้ = ปริมาณผลิต ÷ อายุมีด (ปัดขึ้น) ปริมาณสั่งซื้อที่แนะนำ = จำนวนที่ต้องใช้ × ตัวคูณ + สต็อกขั้นต่ำ − สต็อกปัจจุบัน สั่งเฉพาะเมื่อไม่พอ ด้ามมีดที่ใส่ได้ดูจากรุ่นด้ามมีดใน Excel และรหัส ISO (ใช้อ้างอิงเท่านั้น โปรดตรวจสอบกับของจริง)"],["產品名稱","ชื่อผลิตภัณฑ์"],["刀具儲位","ตำแหน่งจัดเก็บเครื่องมือ"],["標準共變數（刀壽）","ค่ามาตรฐานอายุมีด"],["標準共變數＝刀壽（每個刀口可加工幾件）。需求刀數 = 預計產量 ÷ 刀壽（無條件進位）。建議叫貨 = 需求刀數 × 安全係數 + 最低庫存 − 目前庫存，不足才叫。可裝刀桿依 ISO 型號編碼判斷（形狀、後角、尺寸），僅供參考，請以實物確認。","ค่ามาตรฐาน = อายุมีด (ผลิตได้กี่ชิ้นต่อคมตัด) จำนวนที่ต้องใช้ = ปริมาณผลิต ÷ อายุมีด (ปัดขึ้น) ปริมาณสั่งซื้อที่แนะนำ = จำนวนที่ต้องใช้ × ตัวคูณ + สต็อกขั้นต่ำ − สต็อกปัจจุบัน สั่งเฉพาะเมื่อไม่พอ ด้ามมีดที่ใส่ได้พิจารณาจากรหัส ISO (รูปทรง มุมหลบ ขนาด) ใช้อ้างอิงเท่านั้น โปรดตรวจสอบกับของจริง"],["標準共變數","ค่ามาตรฐานอายุมีด"],["刀桿型號","รุ่นด้ามมีด"],["可裝刀桿","ด้ามมีดที่ใส่ได้"],["可裝刀片","เม็ดมีดที่ใส่ได้"],["各產品預計產量","ปริมาณผลิตที่วางแผนของแต่ละผลิตภัณฑ์"],["預計產量（","ปริมาณผลิตที่วางแผน ("],["未設定產量","ยังไม่ตั้งปริมาณผลิต"],["缺刀壽","ไม่มีอายุมีด"],["工作表","ชีต"],["（可不選）","(ไม่เลือกก็ได้)"],["預計產量（可不選）","ปริมาณผลิตที่วางแผน (ไม่เลือกก็ได้)"],["產品名稱和規格都要填","ต้องกรอกชื่อผลิตภัณฑ์และสเป็ก"],["規格（刀片）","สเป็ก (เม็ดมีด)"],["刀桿型號（可空）","รุ่นด้ามมีด (เว้นว่างได้)"],["標準共變數（刀壽）","ค่ามาตรฐานอายุมีด"],["等 "," รวม "],["…等 ","…รวม "],["品號","รหัสสินค้า"],["規格","สเป็ก"],["編輯排版","แก้ไขการจัดวาง"],["新增方塊","เพิ่มบล็อก"],["還原整張圖","คืนค่าทั้งผัง"],["再按一次確定還原","กดอีกครั้งเพื่อยืนยันคืนค่า"],["依產品上色","ใส่สีตามผลิตภัณฑ์"],["這張圖還沒有指定加工產品","ผังนี้ยังไม่ได้กำหนดผลิตภัณฑ์"],["編輯排版模式：點任何方塊可改顏色、文字、大小、位置。機台的產品請關閉編輯模式後點機台修改。","โหมดแก้ไขการจัดวาง: แตะบล็อกใดก็ได้เพื่อเปลี่ยนสี ข้อความ ขนาด ตำแหน่ง หากต้องการเปลี่ยนผลิตภัณฑ์ของเครื่อง โปรดปิดโหมดแก้ไขแล้วแตะที่เครื่อง"],["（機台／產品方塊，文字請關閉編輯模式後修改）","(บล็อกเครื่อง/ผลิตภัณฑ์ โปรดปิดโหมดแก้ไขแล้วแก้ข้อความ)"],["編輯方塊","แก้ไขบล็อก"],["背景顏色","สีพื้นหลัง"],["無色","ไม่มีสี"],["字級","ขนาดตัวอักษร"],["粗體","ตัวหนา"],["移動（連同機台與產品一起）","ย้าย (พร้อมเครื่องและผลิตภัณฑ์)"],["移動（單一方塊）","ย้าย (บล็อกเดียว)"],["大小（列 × 欄）","ขนาด (แถว × คอลัมน์)"],["列 －","แถว －"],["列 ＋","แถว ＋"],["欄 －","คอลัมน์ －"],["欄 ＋","คอลัมน์ ＋"],["刪除方塊","ลบบล็อก"],["還原此方塊","คืนค่าบล็อกนี้"],["完成","เสร็จสิ้น"],["新方塊","บล็อกใหม่"],["文字","ข้อความ"],["⬆ 從 Excel 匯入產品","นำเข้าผลิตภัณฑ์จาก Excel"],["刀具型號欄位（可不選）","คอลัมน์รุ่นเครื่องมือ (ไม่เลือกก็ได้)"],["刀壽欄位（每把刀可加工幾件，可不選）","คอลัมน์อายุมีด (มีด 1 ใบผลิตได้กี่ชิ้น ไม่เลือกก็ได้)"],["A廠","โรงงาน A"],["D廠","โรงงาน D"],["刀壽資料 ","ข้อมูลอายุมีด "],["匯出 HTML","ส่งออก HTML"],["每月","ต่อเดือน"],["匯出","ส่งออก"],["點一下","แตะ"],["個產品","ผลิตภัณฑ์"],[" 列資料）"," แถว)"],["（共 ","(ทั้งหมด "]
+["✓ 已分配 ","✓ จัดแล้ว "],["；有 ","; มี "],[" 台沒有人能接（當班沒有人會加工，或已達台數上限）："," เครื่องไม่มีคนรับ (ไม่มีคนในกะที่ทำได้ หรือถึงจำนวนสูงสุดแล้ว): "],["要清除 ","ต้องการล้าง "],[" 這一班所有的機台分配嗎？"," การจัดเครื่องจักรทั้งหมดของกะนี้หรือไม่"],[" 已達台數上限"," ถึงจำนวนเครื่องสูงสุดแล้ว"],["👷 顯示 ","👷 แสดงผู้ดูแล "],[" 的操作人"," "],["回到排班","กลับไปจัดตารางกะ"],["關閉顯示","ปิดการแสดงผล"],["排班資料","ข้อมูลตารางกะ"],["刪除人員","ลบพนักงาน"],["複製班表前","ก่อนคัดลอกตารางกะ"],["（一）","(จ.)"],["（二）","(อ.)"],["（三）","(พ.)"],["（四）","(พฤ.)"],["（五）","(ศ.)"],["（六）","(ส.)"],["（日）","(อา.)"],[" 台"," เครื่อง"],[" 人"," คน"],["模具室","ห้องเก็บแม่พิมพ์"],["＋ 新增櫃","＋ เพิ่มตู้"],["刪除此櫃","ลบตู้นี้"],["新櫃的名稱","ชื่อตู้ใหม่"],["櫃的名稱","ชื่อตู้"],["至少要留一個櫃","ต้องเหลือตู้อย่างน้อยหนึ่งตู้"],["A櫃 ＝ 原本的車床刀桿位置圖，B櫃 ＝ 原本的銑床刀桿位置圖，可以按「✏ 改名」修改。","ตู้ A = ผังตำแหน่งด้ามมีดเครื่องกลึงเดิม ตู้ B = ผังตำแหน่งด้ามมีดเครื่องมิลลิ่งเดิม กดเปลี่ยนชื่อเพื่อแก้ไขได้"],["刪除櫃：","ลบตู้: "],["縮小","ย่อ"],["放大","ขยาย"],["全圖","ทั้งผัง"],["結束全螢幕","ออกจากเต็มจอ"],["全螢幕","เต็มจอ"],["製程別","ขั้นตอนการผลิต"],["刀壽","อายุมีด"],["機台號","เลขเครื่อง"],["刀號","หมายเลขมีด"],["品名","ชื่อสินค้า"],["有效長度","ความยาวที่ใช้งาน"],["標準供變數（刀壽）","อายุใช้งานมาตรฐาน (อายุมีด)"],["標準供變數","อายุใช้งานมาตรฐาน"],["匯入前確認","ยืนยันก่อนนำเข้า"],["找到 ","พบ "],[" 個產品、"," ผลิตภัณฑ์ "],[" 列刀具資料（每一列＝產品的一把刀具）。"," แถวข้อมูลเครื่องมือ (1 แถว = เครื่องมือ 1 ชิ้นของผลิตภัณฑ์)"],["…還有 ","…ยังมีอีก "],["選擇刀桿型號（可複選）","เลือกรุ่นด้ามมีด (เลือกได้หลายรายการ)"],["已選","ที่เลือกแล้ว"],["ISO 相容建議（刀桿清單內）","คำแนะนำที่เข้ากันได้ตาม ISO (ในรายการด้ามมีด)"],["其他刀桿","ด้ามมีดอื่น ๆ"],["新增刀桿型號（可貼多筆，逗號或換行分開）","เพิ่มรุ่นด้ามมีด (วางได้หลายรายการ คั่นด้วยจุลภาคหรือขึ้นบรรทัดใหม่)"],["＋ 新增","เพิ่ม"],["選擇","เลือก"],["⬆ 匯入 Excel（刀具壽命管理表）","นำเข้า Excel (ตารางอายุการใช้มีด)"],["刀具壽命資料（","ข้อมูลอายุการใช้มีด ("],["已在表格最上面新增一列，請直接填寫","เพิ่มแถวไว้บนสุดของตารางแล้ว กรอกได้เลย"],["請先匯入刀具壽命管理表（Excel），或在下方手動新增一列","โปรดนำเข้าตารางอายุการใช้มีด (Excel) หรือเพิ่มแถวด้วยตนเองด้านล่าง"],["這份 Excel 不是刀具壽命管理表的格式，請手動對應欄位（共 ","Excel นี้ไม่ใช่รูปแบบตารางอายุการใช้มีด โปรดจับคู่คอลัมน์เอง (ทั้งหมด "],["已匯入 ","นำเข้าแล้ว "],["列刀具資料，新增 "," แถวข้อมูลเครื่องมือ เพิ่ม "],["標準供變數＝刀壽（每個刀口可加工幾件）。需求刀數 = 預計產量 ÷ 刀壽（無條件進位）。建議叫貨 = 需求刀數 × 安全係數 + 最低庫存 − 目前庫存，不足才叫。可裝刀桿依 Excel 的刀桿型號，再加上 ISO 型號編碼判斷（僅供參考，請以實物確認）。","อายุใช้งานมาตรฐาน = อายุมีด (ผลิตได้กี่ชิ้นต่อคมตัด) จำนวนที่ต้องใช้ = ปริมาณผลิต ÷ อายุมีด (ปัดขึ้น) ปริมาณสั่งซื้อที่แนะนำ = จำนวนที่ต้องใช้ × ตัวคูณ + สต็อกขั้นต่ำ − สต็อกปัจจุบัน สั่งเฉพาะเมื่อไม่พอ ด้ามมีดที่ใส่ได้ดูจากรุ่นด้ามมีดใน Excel และรหัส ISO (ใช้อ้างอิงเท่านั้น โปรดตรวจสอบกับของจริง)"],["產品名稱","ชื่อผลิตภัณฑ์"],["刀具儲位","ตำแหน่งจัดเก็บเครื่องมือ"],["標準共變數（刀壽）","ค่ามาตรฐานอายุมีด"],["標準共變數＝刀壽（每個刀口可加工幾件）。需求刀數 = 預計產量 ÷ 刀壽（無條件進位）。建議叫貨 = 需求刀數 × 安全係數 + 最低庫存 − 目前庫存，不足才叫。可裝刀桿依 ISO 型號編碼判斷（形狀、後角、尺寸），僅供參考，請以實物確認。","ค่ามาตรฐาน = อายุมีด (ผลิตได้กี่ชิ้นต่อคมตัด) จำนวนที่ต้องใช้ = ปริมาณผลิต ÷ อายุมีด (ปัดขึ้น) ปริมาณสั่งซื้อที่แนะนำ = จำนวนที่ต้องใช้ × ตัวคูณ + สต็อกขั้นต่ำ − สต็อกปัจจุบัน สั่งเฉพาะเมื่อไม่พอ ด้ามมีดที่ใส่ได้พิจารณาจากรหัส ISO (รูปทรง มุมหลบ ขนาด) ใช้อ้างอิงเท่านั้น โปรดตรวจสอบกับของจริง"],["標準共變數","ค่ามาตรฐานอายุมีด"],["刀桿型號","รุ่นด้ามมีด"],["可裝刀桿","ด้ามมีดที่ใส่ได้"],["可裝刀片","เม็ดมีดที่ใส่ได้"],["各產品預計產量","ปริมาณผลิตที่วางแผนของแต่ละผลิตภัณฑ์"],["預計產量（","ปริมาณผลิตที่วางแผน ("],["未設定產量","ยังไม่ตั้งปริมาณผลิต"],["缺刀壽","ไม่มีอายุมีด"],["工作表","ชีต"],["（可不選）","(ไม่เลือกก็ได้)"],["預計產量（可不選）","ปริมาณผลิตที่วางแผน (ไม่เลือกก็ได้)"],["產品名稱和規格都要填","ต้องกรอกชื่อผลิตภัณฑ์และสเป็ก"],["規格（刀片）","สเป็ก (เม็ดมีด)"],["刀桿型號（可空）","รุ่นด้ามมีด (เว้นว่างได้)"],["標準共變數（刀壽）","ค่ามาตรฐานอายุมีด"],["等 "," รวม "],["…等 ","…รวม "],["品號","รหัสสินค้า"],["規格","สเป็ก"],["編輯排版","แก้ไขการจัดวาง"],["新增方塊","เพิ่มบล็อก"],["還原整張圖","คืนค่าทั้งผัง"],["再按一次確定還原","กดอีกครั้งเพื่อยืนยันคืนค่า"],["依產品上色","ใส่สีตามผลิตภัณฑ์"],["這張圖還沒有指定加工產品","ผังนี้ยังไม่ได้กำหนดผลิตภัณฑ์"],["編輯排版模式：點任何方塊可改顏色、文字、大小、位置。機台的產品請關閉編輯模式後點機台修改。","โหมดแก้ไขการจัดวาง: แตะบล็อกใดก็ได้เพื่อเปลี่ยนสี ข้อความ ขนาด ตำแหน่ง หากต้องการเปลี่ยนผลิตภัณฑ์ของเครื่อง โปรดปิดโหมดแก้ไขแล้วแตะที่เครื่อง"],["（機台／產品方塊，文字請關閉編輯模式後修改）","(บล็อกเครื่อง/ผลิตภัณฑ์ โปรดปิดโหมดแก้ไขแล้วแก้ข้อความ)"],["編輯方塊","แก้ไขบล็อก"],["背景顏色","สีพื้นหลัง"],["無色","ไม่มีสี"],["字級","ขนาดตัวอักษร"],["粗體","ตัวหนา"],["移動（連同機台與產品一起）","ย้าย (พร้อมเครื่องและผลิตภัณฑ์)"],["移動（單一方塊）","ย้าย (บล็อกเดียว)"],["大小（列 × 欄）","ขนาด (แถว × คอลัมน์)"],["列 －","แถว －"],["列 ＋","แถว ＋"],["欄 －","คอลัมน์ －"],["欄 ＋","คอลัมน์ ＋"],["刪除方塊","ลบบล็อก"],["還原此方塊","คืนค่าบล็อกนี้"],["完成","เสร็จสิ้น"],["新方塊","บล็อกใหม่"],["文字","ข้อความ"],["⬆ 從 Excel 匯入產品","นำเข้าผลิตภัณฑ์จาก Excel"],["刀具型號欄位（可不選）","คอลัมน์รุ่นเครื่องมือ (ไม่เลือกก็ได้)"],["刀壽欄位（每把刀可加工幾件，可不選）","คอลัมน์อายุมีด (มีด 1 ใบผลิตได้กี่ชิ้น ไม่เลือกก็ได้)"],["A廠","โรงงาน A"],["D廠","โรงงาน D"],["刀壽資料 ","ข้อมูลอายุมีด "],["匯出 HTML","ส่งออก HTML"],["每月","ต่อเดือน"],["匯出","ส่งออก"],["點一下","แตะ"],["個產品","ผลิตภัณฑ์"],[" 列資料）"," แถว)"],["（共 ","(ทั้งหมด "]
 ];
 TH.sort((a,b)=>b[0].length-a[0].length);
 let LANG="both";try{LANG=localStorage.getItem("toollang")||"both"}catch(e){}
@@ -774,7 +794,7 @@ function langRestore(a){if(!a)return;const e=document.querySelectorAll(LANC)[a.i
 function setLang(l){const a=scrollY>2?langAnchor():null;LANG=l;try{localStorage.setItem("toollang",l)}catch(e){}langBtns().forEach(b=>{b.textContent=LLBL[l]});try{render()}catch(e){}trApply();langRestore(a)}
 langBtns().forEach(b=>{b.textContent=LLBL[LANG];b.onclick=()=>setLang(LMODES[(LMODES.indexOf(LANG)+1)%3])});
 if(LANG!=="zh")trApply();
-const NAVD={v_l:"刀桿清單",v_m:"車床位置圖",v_n:"銑床位置圖",v_p:"加工產品",v_f:"現場機台",v_s:"排班"};
+const NAVD={v_l:"刀桿清單",v_m:"模具室",v_p:"加工產品",v_f:"現場機台",v_s:"排班"};
 let NAVN={},nref=null;
 try{const r=JSON.parse(localStorage.getItem("toolnav")||"null");if(r&&typeof r==="object")NAVN=r}catch(e){}
 function applyNav(){Object.keys(NAVD).forEach(id=>{const b=$(id);if(!b)return;const t=(NAVN[id]||"").trim()||NAVD[id];if(b.dataset.navt!==t){b.dataset.navt=t;if(t!==NAVD[id])b.dataset.notr="1";else delete b.dataset.notr;b.textContent=t}})}
@@ -1090,9 +1110,7 @@ $("bulk").onclick=e=>{const a=e.target.dataset.bk;if(!a||!canW)return;const ids=
  if(a==="cat"){const c=$("bk_cat").value;items.forEach(i=>{if(selSet.has(i.id))i.cat=c});save();render();$("dmsg").textContent="✓ 已把 "+ids.length+" 筆改成「"+c+"」類別"}};
 function renameModel(o,n){const k=nz(o);if(!k||o===n)return;
  const fix=cl=>{let any=false;for(const key of Object.keys(cl||{})){let c=false;const L=String(cl[key]||"").split("\n").map(x=>{if(nz(x)===k){c=true;return n}return x});if(c){cl[key]=L.join("\n");any=true}}return any};
- const cur=curMap,a=fix(getMap("l").cells),b=fix(getMap("m").cells);
- if(a){swapMap("l");snap("刀具改名："+o+" → "+n);saveCells()}
- if(b){swapMap("m");snap("刀具改名："+o+" → "+n);saveCells()}
+ const cur=curMap;cabList().forEach(c=>{if(fix(getMap(c.id).cells)){swapMap(c.id);snap("刀具改名："+o+" → "+n);saveCells()}});
  swapMap(cur);
  let sp=false;SPEC.rows.forEach(r=>{if(nz(r.sp)===k){r.sp=n;sp=true}if((r.hs||[]).some(h=>nz(h)===k)){r.hs=r.hs.map(h=>nz(h)===k?n:h);sp=true}});if(sp)saveSpec()}
 const genPw=()=>{const A="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789",u=new Uint32Array(10);crypto.getRandomValues(u);return[...u].map(x=>A[x%A.length]).join("")};
@@ -1240,7 +1258,7 @@ async function snapIndexPut(rows){if(CLOUD)return api("app_settings?on_conflict=
 async function snapPut(k,v){if(CLOUD)return api("app_settings?on_conflict=key",{method:"POST",prefer:UPS,body:{key:k,value:v,updated_at:new Date().toISOString()}});return dbh.doc("layout/"+k).set(v)}
 async function snapGet(k){if(CLOUD){const r=await api("app_settings?select=value&key=eq."+k);return r&&r[0]?r[0].value:null}const d=await dbh.doc("layout/"+k).get();return d.exists?d.data():null}
 async function snapDel(k){if(CLOUD)return api("app_settings?key=eq."+k,{method:"DELETE"});return dbh.doc("layout/"+k).delete()}
-function snapData(){const m=k=>{const x=getMap(k);return x?{cells:x.cells,nc:x.nc,nr:x.nr,hist:x.hist}:null};return clone({items,logs,cats:CATS,prods:PRODS,spec:SPEC,po:PO,ph:PH,sh:SH,nav:NAVN,fac:FAC,maps:{l:m("l"),m:m("m")}})}
+function snapData(){const m=k=>{const x=getMap(k);return x?{cells:x.cells,nc:x.nc,nr:x.nr,hist:x.hist}:null};return clone({items,logs,cats:CATS,prods:PRODS,spec:SPEC,po:PO,ph:PH,sh:SH,nav:NAVN,fac:FAC,maps:Object.fromEntries(cabList().map(c=>[c.id,m(c.id)])),cabs:cabList()})}
 function snapFp(){const str=cs(items)+JSON.stringify(logs)+cs(SPEC)+cs(PO)+cs(PH)+cs(SH)+cs(CATS)+cs(PRODS);let h=5381;for(let i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))|0;return str.length+":"+h}
 async function snapNow(label,manual){if(!snapOK()||snapBusy)return false;snapBusy=true;try{const t=Date.now(),k="snap-"+t.toString(36),data=snapData(),fp=snapFp(),z=await zipS(JSON.stringify(data)),rows=await snapIndexGet();
   await snapPut(k,{t,label,who:WHO(),blob:z});
@@ -1252,12 +1270,12 @@ function snapAuto(label){if(snapOK()&&Date.now()-snapLast>5*6e4)snapNow(label)}
 setInterval(async()=>{if(!snapOK()||snapBusy)return;if(!snapInit){snapInit=true;try{const r=await snapIndexGet();snapLast=r.length?r[r.length-1].t:0}catch(e){}snapFp0=snapFp();if(Date.now()-snapLast>6*36e5)snapNow("自動備份");return}
  const fp=snapFp();if(fp!==snapFp0&&Date.now()-snapLast>30*6e4)snapNow("自動備份")},6e4);
 /* ---- 還原 ---- */
-function restoreMap(k,d){if(!d)return;const cur=curMap;swapMap(k);cells=clone(d.cells);setGrid(d.nc,d.nr);hist=clone(d.hist||[]);saveCells();saveHist();swapMap(cur)}
+function restoreMap(k,d){if(!d)return;const cur=curMap;swapMap(k);cabBind(k);cells=clone(d.cells);setGrid(d.nc,d.nr);hist=clone(d.hist||[]);saveCells();saveHist();swapMap(cur)}
 async function rbDoSections(S,secs){await snapNow("還原前的狀態",true);
  if(secs.has("tools")){const keep=new Set(Object.keys(S.logs||{}));Object.keys(logs).forEach(id=>{if(!keep.has(id))dropLog(id)});items=clone(S.items||[]);logs=clone(S.logs||{});Object.keys(logs).forEach(id=>saveLog(id));pq={};ps={};save()}
  if(secs.has("po")){PO=clone(S.po||[]);PH=clone(S.ph||[]);savePO();savePH()}
  if(secs.has("spec")){SPEC=clone(S.spec);PRODS=clone(S.prods||[]);saveSpec();saveProds()}
- if(secs.has("maps")){restoreMap("l",S.maps&&S.maps.l);restoreMap("m",S.maps&&S.maps.m)}
+ if(secs.has("maps")){if(S.cabs&&S.cabs.length){CABS=clone(S.cabs);saveCabs()}Object.keys(S.maps||{}).forEach(k=>restoreMap(k,S.maps[k]))}
  if(secs.has("shift")){SH=clone(S.sh||[]);saveSH()}
  if(secs.has("misc")){CATS=clone(S.cats);saveCats();NAVN=clone(S.nav||{});saveNav();applyNav();if(S.fac){FAC=clone(S.fac);saveFac()}}
  render();try{renderMap()}catch(e){}}
@@ -1395,6 +1413,30 @@ function shOverlay(){const f=$("facv");if(!f)return;if(!shOv){return}const sf=SH
 $("facv").addEventListener("click",e=>{const a=e.target.dataset&&e.target.dataset.sov;if(!a)return;e.stopPropagation();if(a==="back"){view="s";shTab="asg";render()}else{shOv=null;render()}},true);
 {const _rf=renderFac;renderFac=function(){_rf.apply(this,arguments);shOverlay()}}
 $("v_s").onclick=()=>{view="s";render()};
+/* ===== 模具室：多個櫃（A櫃、B櫃、C櫃…），每個櫃是一張位置圖 ===== */
+function saveCabs(){saveRows("toolcabs",CABS,cabref)}
+function cabEnsure(){if(!CABS.length)CABS=cabList().map((c,i)=>Object.assign({},c,{order:i+1}))}
+function cabBind(id){if(id==="l"||id==="m"||!dbh)return;const lr=dbh.doc("layout/"+mapDoc(id)),hr=dbh.doc("layout/"+histDoc(id));if(curMap===id){lref=lr;hrf=hr}else{const t=MP[id]||(MP[id]=newMapObj());t.lref=lr;t.hrf=hr}}
+const cabExport=()=>Object.fromEntries(cabList().filter(c=>c.id!=="l"&&c.id!=="m").map(c=>{const g=getMap(c.id);return[c.id,{cells:g.cells,nc:g.nc,nr:g.nr,hist:g.hist}]}));
+function cabImport(d){if(Array.isArray(d.cabs)&&d.cabs.length){CABS=d.cabs;saveCabs()}
+ if(d.cabd&&typeof d.cabd==="object")Object.keys(d.cabd).forEach(id=>{const x=d.cabd[id]||{};MP[id]=Object.assign(newMapObj(),{cells:x.cells||{},nc:x.nc||6,nr:x.nr||6,hist:x.hist||[]});cabBind(id);const cur=curMap;swapMap(id);saveCells();saveHist();swapMap(cur)})}
+const cabCf=armed=>`<button data-cabx="del" class="cf${armed?" p":""}"${armed?' style="background:var(--warn);border-color:var(--warn)"':""}><span class="${armed?"h":""}">刪除此櫃</span><span class="${armed?"":"h"}">確定刪除</span></button><button data-cabx="dc" class="cf${armed?"":" hid"}">取消</button>`;
+function renderCabBar(){const b=$("cabbar"),adm=canW,q=nz($("q").value||""),L=cabList(),cnt=id=>{if(!q)return"";const g=getMap(id);let n=0;Object.values(g.cells||{}).forEach(t=>{if(nz(t).includes(q))n++});return n?" ("+n+")":""};
+ b.innerHTML=L.map(c=>`<button class="cab${c.id===curMap?" p":""}" data-cab="${esc(c.id)}">${esc(c.name)}${cnt(c.id)}</button>`).join("")+(adm?`<span style="flex:1"></span><button data-cabx="add">＋ 新增櫃</button><button data-cabx="ren">✏ 改名</button><button data-cabx="l">◀</button><button data-cabx="r">▶</button>${cabCf(cabDel===curMap)}`:"")
+  +(adm&&!CABS.length?'<div class="s" style="flex-basis:100%">A櫃 ＝ 原本的車床刀桿位置圖，B櫃 ＝ 原本的銑床刀桿位置圖，可以按「✏ 改名」修改。</div>':"")+(cabMsg?`<div class="s" style="flex-basis:100%;color:var(--warn)">${esc(cabMsg)}</div>`:"")}
+$("cabbar").onclick=async e=>{const t=e.target;cabMsg="";
+ if(t.dataset.cab){swapMap(t.dataset.cab);focusK=null;cabDel=null;render();return}
+ const x=t.dataset.cabx;if(!x||!canW)return;
+ if(x==="dc"){cabDel=null;renderCabBar();return}
+ if(x==="add"){const n=await askText("新櫃的名稱","");if(!n||!n.trim())return;cabEnsure();const id="c"+Date.now().toString(36);CABS.push({id,name:n.trim(),order:Math.max(0,...CABS.map(c=>c.order||0))+1});MP[id]=newMapObj();cabBind(id);saveCabs();swapMap(id);saveCells();saveHist();focusK=null;render();return}
+ if(x==="ren"){const n=await askText("櫃的名稱",cabName(curMap));if(!n||!n.trim())return;cabEnsure();const c=CABS.find(y=>y.id===curMap);if(c){c.name=n.trim();saveCabs()}renderCabBar();return}
+ if(x==="l"||x==="r"){cabEnsure();const L=cabList(),i=L.findIndex(c=>c.id===curMap),j=i+(x==="l"?-1:1);if(j<0||j>=L.length)return;const a=CABS.find(c=>c.id===L[i].id),b=CABS.find(c=>c.id===L[j].id);if(a&&b){const o=a.order;a.order=b.order;b.order=o;saveCabs()}renderCabBar();return}
+ if(x==="del"){if(cabDel!==curMap){cabDel=curMap;renderCabBar();return}
+  if(cabList().length<=1){cabDel=null;cabMsg="至少要留一個櫃";renderCabBar();return}
+  const id=curMap,nm=cabName(id);snapAuto("刪除櫃："+nm);cabEnsure();CABS=CABS.filter(c=>c.id!==id);saveCabs();const nxt=cabList()[0].id;swapMap(nxt);
+  if(id!=="l"&&id!=="m"){delete MP[id];try{if(CLOUD)api("app_settings?key=in.("+mapKey(id)+","+histKey(id)+")",{method:"DELETE"}).catch(()=>{});else if(dbh){dbh.doc("layout/"+mapDoc(id)).delete().catch(()=>{});dbh.doc("layout/"+histDoc(id)).delete().catch(()=>{})}["toolcells","toolgrid","toolhist"].forEach(k=>localStorage.removeItem(k+mapSuf(id)))}catch(e){}}
+  cabDel=null;focusK=null;render()}};
+$("v_n").hidden=true;
 var lopen=new Set(),mapZ=null,mapFull=false,facFit=true,facFull=false;
 function mapZoom(){const box=$("map"),g=box.querySelector(".mg");if(!g||!box.clientWidth)return;
  const natC="24px repeat("+NC+",minmax(104px,1fr))",natW=24+NC*108,aw=box.clientWidth-(mapFull?22:14),ah=innerHeight-74;
